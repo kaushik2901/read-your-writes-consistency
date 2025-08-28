@@ -1,0 +1,100 @@
+@host = http://localhost:5174
+@userId = 1
+@projectId = 2
+@taskId = 2
+
+### Health
+GET {{host}}/health
+Accept: application/json
+
+### Swagger UI (open in browser)
+# GET {{host}}/swagger
+
+### Users - list all
+GET {{host}}/api/v1/users
+X-User-Id: {{userId}}
+Accept: application/json
+
+### Dashboard - projects for current user
+GET {{host}}/api/v1/dashboard
+X-User-Id: {{userId}}
+Accept: application/json
+
+### Project - get details
+GET {{host}}/api/v1/projects/{{projectId}}
+X-User-Id: {{userId}}
+Accept: application/json
+
+### Project - list tasks
+GET {{host}}/api/v1/projects/{{projectId}}/tasks
+X-User-Id: {{userId}}
+Accept: application/json
+
+### Project - create
+POST {{host}}/api/v1/projects
+X-User-Id: {{userId}}
+X-Db-Intent: write
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "New Project from HTTP",
+  "memberUserIds": [1,2,3]
+}
+
+### Project - update
+PUT {{host}}/api/v1/projects/{{projectId}}
+X-User-Id: {{userId}}
+X-Db-Intent: write
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Renamed Project",
+  "memberUserIds": [1,3]
+}
+
+### Project - delete
+DELETE {{host}}/api/v1/projects/{{projectId}}
+X-User-Id: {{userId}}
+X-Db-Intent: write
+Accept: */*
+
+### Task - create
+POST {{host}}/api/v1/tasks
+X-User-Id: {{userId}}
+X-Db-Intent: write
+Content-Type: application/json
+Accept: application/json
+
+{
+  "projectId": {{projectId}},
+  "name": "New Task from HTTP",
+  "assignedUserId": 2,
+  "status": "New"
+}
+
+### Task - update
+PUT {{host}}/api/v1/tasks/{{taskId}}
+X-User-Id: {{userId}}
+X-Db-Intent: write
+Content-Type: application/json
+Accept: */*
+
+{
+  "taskId": {{taskId}},
+  "name": "Updated Task Name",
+  "status": "Active",
+  "assignedUserId": 3
+}
+
+### Task - delete
+DELETE {{host}}/api/v1/tasks/{{taskId}}
+X-User-Id: {{userId}}
+X-Db-Intent: write
+Accept: */*
+
+### V2 scaffold (should return 501)
+GET {{host}}/api/v2/anything
+Accept: */*
+
