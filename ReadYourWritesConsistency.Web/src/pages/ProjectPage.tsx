@@ -5,30 +5,6 @@ import { useAppState } from '@/state/AppState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Table,
   TableBody,
   TableCell,
@@ -37,10 +13,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Calendar, Pencil, Plus, Trash2 } from 'lucide-react';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 
 type Project = {
   id: number;
@@ -56,34 +28,10 @@ type TaskItem = {
   status: string;
 };
 
-type User = {
-  id: number;
-  userName: string;
-  displayName: string;
-};
-
-const formSchema = z.object({
-  name: z.string().min(1, 'Project name is required'),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-const taskFormSchema = z.object({
-  name: z.string().min(1, 'Task name is required'),
-  status: z.string().min(1, 'Status is required'),
-  assignedUserId: z.number().optional(),
-});
-
-type TaskFormValues = z.infer<typeof taskFormSchema>;
-
 export function ProjectPage() {
   const { projectId = '' } = useParams();
   const { api } = useApiBase();
   const { userId, consistencyMode, setLastIntent } = useAppState();
-  const queryClient = useQueryClient();
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isCreateTaskDialogOpen, setIsCreateTaskDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<TaskItem | null>(null);
 
   const {
     data: project,
@@ -112,134 +60,6 @@ export function ProjectPage() {
     },
     enabled: !!projectId,
   });
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: project?.name || '',
-    },
-  });
-
-  const taskForm = useForm<TaskFormValues>({
-    resolver: zodResolver(taskFormSchema),
-    defaultValues: {
-      name: '',
-      status: 'new',
-      assignedUserId: undefined,
-    },
-  });
-
-  // Update form default values when project data loads
-  React.useEffect(() => {
-    if (project) {
-      form.reset({ name: project.name });
-    }
-  }, [project, form]);
-
-  const handleEditProject = async (values: FormValues) => {
-    try {
-      await api(`/projects/${projectId}`, {
-        method: 'PUT',
-        body: {
-          name: values.name,
-          memberUserIds: [], // Send empty array instead of null
-        },
-      });
-
-      // Close dialog and refresh project data
-      setIsEditDialogOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['project', projectId, userId, consistencyMode] });
-    } catch (error) {
-      console.error('Failed to update project:', error);
-      // TODO: Show error to user
-    }
-  };
-
-  const handleCreateTask = async (values: TaskFormValues) => {
-    try {
-      await api('/tasks', {
-        method: 'POST',
-        body: {
-          projectId: parseInt(projectId),
-          name: values.name,
-          status: values.status,
-          assignedUserId: values.assignedUserId || null,
-        },
-      });
-
-      // Close dialog and refresh tasks data
-      setIsCreateTaskDialogOpen(false);
-      taskForm.reset({ name: '', status: 'new', assignedUserId: undefined });
-      queryClient.invalidateQueries({
-        queryKey: ['projectTasks', projectId, userId, consistencyMode],
-      });
-    } catch (error) {
-      console.error('Failed to create task:', error);
-      // TODO: Show error to user
-    }
-  };
-
-  const handleEditTask = (task: TaskItem) => {
-    setEditingTask(task);
-    taskForm.reset({
-      name: task.name,
-      status: task.status,
-      assignedUserId: undefined, // We don't have this info in the current task model
-    });
-  };
-
-  // Update task form when editing task changes
-  React.useEffect(() => {
-    if (editingTask) {
-      taskForm.reset({
-        name: editingTask.name,
-        status: editingTask.status,
-        assignedUserId: undefined, // We don't have this info in the current task model
-      });
-    }
-  }, [editingTask, taskForm]);
-
-  const handleUpdateTask = async (values: TaskFormValues) => {
-    if (!editingTask) return;
-
-    try {
-      await api(`/tasks/${editingTask.id}`, {
-        method: 'PUT',
-        body: {
-          taskId: editingTask.id,
-          name: values.name || undefined,
-          status: values.status || undefined,
-          assignedUserId: values.assignedUserId || null,
-        },
-      });
-
-      // Close dialog and refresh tasks data
-      setEditingTask(null);
-      taskForm.reset({ name: '', status: 'new', assignedUserId: undefined });
-      queryClient.invalidateQueries({
-        queryKey: ['projectTasks', projectId, userId, consistencyMode],
-      });
-    } catch (error) {
-      console.error('Failed to update task:', error);
-      // TODO: Show error to user
-    }
-  };
-
-  const handleDeleteTask = async (taskId: number) => {
-    try {
-      await api(`/tasks/${taskId}`, {
-        method: 'DELETE',
-      });
-
-      // Refresh tasks data
-      queryClient.invalidateQueries({
-        queryKey: ['projectTasks', projectId, userId, consistencyMode],
-      });
-    } catch (error) {
-      console.error('Failed to delete task:', error);
-      // TODO: Show error to user
-    }
-  };
 
   if (loadingProject || loadingTasks)
     return (
@@ -288,7 +108,7 @@ export function ProjectPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
+            <Button variant="outline" size="sm" onClick={() => {}}>
               <Pencil className="mr-2 h-4 w-4" />
               Edit Project
             </Button>
@@ -296,224 +116,11 @@ export function ProjectPage() {
         </div>
       </div>
 
-      {/* Edit Project Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Project</DialogTitle>
-            <DialogDescription>
-              Make changes to your project here. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleEditProject)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Project name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Save Changes</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Create Task Dialog */}
-      <Dialog open={isCreateTaskDialogOpen} onOpenChange={setIsCreateTaskDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Task</DialogTitle>
-            <DialogDescription>
-              Add a new task to your project. Click create when you're done.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...taskForm}>
-            <form onSubmit={taskForm.handleSubmit(handleCreateTask)} className="space-y-4">
-              <FormField
-                control={taskForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Task Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Task name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={taskForm.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="blocked">Blocked</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={taskForm.control}
-                name="assignedUserId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assign To</FormLabel>
-                    <Select
-                      onValueChange={value =>
-                        field.onChange(value === '0' ? null : parseInt(value))
-                      }
-                      value={field.value?.toString() || '0'}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select user" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="0">Unassigned</SelectItem>
-                        {project.members.map(member => (
-                          <SelectItem key={member.userId} value={member.userId.toString()}>
-                            {member.displayName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsCreateTaskDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">Create Task</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Task Dialog */}
-      <Dialog open={!!editingTask} onOpenChange={open => !open && setEditingTask(null)}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Task</DialogTitle>
-            <DialogDescription>
-              Make changes to your task. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...taskForm}>
-            <form onSubmit={taskForm.handleSubmit(handleUpdateTask)} className="space-y-4">
-              <FormField
-                control={taskForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Task Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Task name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={taskForm.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="blocked">Blocked</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={taskForm.control}
-                name="assignedUserId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assign To</FormLabel>
-                    <Select
-                      onValueChange={value =>
-                        field.onChange(value === '0' ? null : parseInt(value))
-                      }
-                      value={field.value?.toString() || '0'}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select user" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="0">Unassigned</SelectItem>
-                        {project.members.map(member => (
-                          <SelectItem key={member.userId} value={member.userId.toString()}>
-                            {member.displayName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setEditingTask(null)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Save Changes</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
       {/* Tasks Section */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Tasks</h2>
-          <Button size="sm" onClick={() => setIsCreateTaskDialogOpen(true)}>
+          <Button size="sm" onClick={() => {}}>
             <Plus className="mr-2 h-4 w-4" />
             Add Task
           </Button>
@@ -528,7 +135,7 @@ export function ProjectPage() {
         {!tasks || tasks.length === 0 ? (
           <div className="text-center p-8 bg-muted rounded-lg">
             <p className="text-muted-foreground">No tasks found for this project.</p>
-            <Button className="mt-4" onClick={() => setIsCreateTaskDialogOpen(true)}>
+            <Button className="mt-4" onClick={() => {}}>
               <Plus className="mr-2 h-4 w-4" />
               Create Your First Task
             </Button>
@@ -556,10 +163,10 @@ export function ProjectPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEditTask(t)}>
+                        <Button variant="outline" size="sm" onClick={() => {}}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDeleteTask(t.id)}>
+                        <Button variant="outline" size="sm" onClick={() => {}}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
