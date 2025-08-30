@@ -3,9 +3,9 @@ using ReadYourWritesConsistency.API.Models;
 
 namespace ReadYourWritesConsistency.API.Middlewares;
 
-public sealed class ExceptionHandlingMiddleware(RequestDelegate next, IDbIntentAccessor dbIntentAccessor, ILogger<ExceptionHandlingMiddleware> logger)
+public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
 {
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, IDbIntentAccessor dbIntentAccessor)
     {
         try
         {

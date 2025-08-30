@@ -30,4 +30,4 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapV1Endpoints();
 app.MapV2Endpoints();
 
-app.Run();
+await app.RunAsync();
