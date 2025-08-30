@@ -11,27 +11,27 @@ Accept: application/json
 # GET {{host}}/swagger
 
 ### Users - list all
-GET {{host}}/api/v1/users
+GET {{host}}/v1/users
 X-User-Id: {{userId}}
 Accept: application/json
 
 ### Dashboard - projects for current user
-GET {{host}}/api/v1/dashboard
+GET {{host}}/v1/dashboard
 X-User-Id: {{userId}}
 Accept: application/json
 
 ### Project - get details
-GET {{host}}/api/v1/projects/{{projectId}}
+GET {{host}}/v1/projects/{{projectId}}
 X-User-Id: {{userId}}
 Accept: application/json
 
 ### Project - list tasks
-GET {{host}}/api/v1/projects/{{projectId}}/tasks
+GET {{host}}/v1/projects/{{projectId}}/tasks
 X-User-Id: {{userId}}
 Accept: application/json
 
 ### Project - create
-POST {{host}}/api/v1/projects
+POST {{host}}/v1/projects
 X-User-Id: {{userId}}
 X-Db-Intent: write
 Content-Type: application/json
@@ -43,7 +43,7 @@ Accept: application/json
 }
 
 ### Project - update
-PUT {{host}}/api/v1/projects/{{projectId}}
+PUT {{host}}/v1/projects/{{projectId}}
 X-User-Id: {{userId}}
 X-Db-Intent: write
 Content-Type: application/json
@@ -55,13 +55,13 @@ Accept: application/json
 }
 
 ### Project - delete
-DELETE {{host}}/api/v1/projects/{{projectId}}
+DELETE {{host}}/v1/projects/{{projectId}}
 X-User-Id: {{userId}}
 X-Db-Intent: write
 Accept: */*
 
 ### Task - create
-POST {{host}}/api/v1/tasks
+POST {{host}}/v1/tasks
 X-User-Id: {{userId}}
 X-Db-Intent: write
 Content-Type: application/json
@@ -75,7 +75,7 @@ Accept: application/json
 }
 
 ### Task - update
-PUT {{host}}/api/v1/tasks/{{taskId}}
+PUT {{host}}/v1/tasks/{{taskId}}
 X-User-Id: {{userId}}
 X-Db-Intent: write
 Content-Type: application/json
@@ -89,12 +89,11 @@ Accept: */*
 }
 
 ### Task - delete
-DELETE {{host}}/api/v1/tasks/{{taskId}}
+DELETE {{host}}/v1/tasks/{{taskId}}
 X-User-Id: {{userId}}
 X-Db-Intent: write
 Accept: */*
 
 ### V2 scaffold (should return 501)
-GET {{host}}/api/v2/anything
+GET {{host}}/v2/anything
 Accept: */*
-
