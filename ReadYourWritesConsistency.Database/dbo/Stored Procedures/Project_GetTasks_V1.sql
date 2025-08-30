@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[Project_GetTasks]
+CREATE PROCEDURE [dbo].[Project_GetTasks_V1]
     @RequestingUserId INT,
     @ProjectId INT
 AS

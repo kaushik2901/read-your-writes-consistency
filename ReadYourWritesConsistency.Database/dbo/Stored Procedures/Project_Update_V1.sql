@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[Project_Update]
+CREATE PROCEDURE [dbo].[Project_Update_V1]
     @RequestingUserId INT,
     @ProjectId INT,
     @Name NVARCHAR(200),

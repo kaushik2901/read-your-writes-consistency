@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[Projects_GetDashboard]
+CREATE PROCEDURE [dbo].[Projects_GetDashboard_V1]
     @RequestingUserId INT
 AS
 BEGIN

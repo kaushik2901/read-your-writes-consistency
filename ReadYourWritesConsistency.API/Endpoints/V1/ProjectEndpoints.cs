@@ -22,7 +22,7 @@ public static class ProjectEndpoints
         var result = await dbFactory
             .Create()
             .QueryMultiResultStoredProcAsync<ProjectMetaDataDto, ProjectMemberDto>(
-                "[dbo].[Project_Get]",
+                "[dbo].[Project_Get_V1]",
                 new { RequestingUserId = currentUser.UserId, ProjectId = projectId }
             );
 
@@ -46,7 +46,7 @@ public static class ProjectEndpoints
         var result = await dbFactory
             .Create()
             .QueryStoredProcAsync<TaskListItemDto>(
-                "[dbo].[Project_GetTasks]",
+                "[dbo].[Project_GetTasks_V1]",
                 new { RequestingUserId = currentUser.UserId, ProjectId = projectId }
             );
 

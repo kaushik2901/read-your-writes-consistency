@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[Project_Create]
+CREATE PROCEDURE [dbo].[Project_Create_V1]
     @RequestingUserId INT,
     @Name NVARCHAR(200),
     @MemberUserIds [dbo].[UserIdList] READONLY

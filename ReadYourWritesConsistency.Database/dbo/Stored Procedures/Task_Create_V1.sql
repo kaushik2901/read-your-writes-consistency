@@ -1,18 +1,12 @@
-CREATE PROCEDURE [dbo].[Task_Delete]
+CREATE PROCEDURE [dbo].[Task_Create_V1]
     @RequestingUserId INT,
-    @TaskId INT
+    @ProjectId INT,
+    @Name NVARCHAR(200),
+    @AssignedUserId INT,
+    @Status NVARCHAR(50) = N'New'
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    DECLARE @ProjectId INT;
-    SELECT @ProjectId = [ProjectId] FROM [dbo].[Tasks] WHERE [Id] = @TaskId;
-
-    IF @ProjectId IS NULL
-    BEGIN
-        RAISERROR('Task not found.', 16, 1);
-        RETURN;
-    END
 
     IF NOT EXISTS (
         SELECT 1 FROM [dbo].[ProjectMembers]
@@ -23,12 +17,14 @@ BEGIN
         RETURN;
     END
 
-    DELETE FROM [dbo].[Tasks]
-    WHERE [Id] = @TaskId;
+    INSERT INTO [dbo].[Tasks]([ProjectId], [Name], [Status], [AssignedUserId])
+    VALUES (@ProjectId, @Name, @Status, @AssignedUserId);
 
     UPDATE [dbo].[Projects]
     SET [LastUpdatedAtUtc] = SYSUTCDATETIME()
     WHERE [Id] = @ProjectId;
+
+    SELECT SCOPE_IDENTITY() AS [NewTaskId];
 END
 
 

@@ -32,7 +32,7 @@ public static class ProjectWriteEndpoints
         var result = await dbFactory
             .Create()
             .ExecuteStoredProcAsync(
-                "[dbo].[Project_Create]",
+                "[dbo].[Project_Create_V1]",
                 parameters
             );
 
@@ -52,7 +52,7 @@ public static class ProjectWriteEndpoints
         var result = await dbFactory
             .Create()
             .ExecuteStoredProcAsync(
-                "[dbo].[Project_Update]",
+                "[dbo].[Project_Update_V1]",
                 parameters
             );
 
@@ -66,7 +66,7 @@ public static class ProjectWriteEndpoints
         var result = await dbFactory
             .Create()
             .ExecuteStoredProcAsync(
-                "[dbo].[Project_Delete]",
+                "[dbo].[Project_Delete_V1]",
                 new { RequestingUserId = currentUser.UserId, ProjectId = projectId }
             );
 

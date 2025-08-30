@@ -24,7 +24,7 @@ public static class TaskEndpoints
         var result = await dbFactory
             .Create()
             .ExecuteStoredProcAsync(
-                "[dbo].[Task_Create]",
+                "[dbo].[Task_Create_V1]",
                 new
                 {
                     RequestingUserId = currentUser.UserId,
@@ -45,7 +45,7 @@ public static class TaskEndpoints
         var result = await dbFactory
             .Create()
             .ExecuteStoredProcAsync(
-                "[dbo].[Task_Update]",
+                "[dbo].[Task_Update_V1]",
                 new
                 {
                     RequestingUserId = currentUser.UserId,
@@ -66,7 +66,7 @@ public static class TaskEndpoints
         var result = await dbFactory
             .Create()
             .ExecuteStoredProcAsync(
-                "[dbo].[Task_Delete]",
+                "[dbo].[Task_Delete_V1]",
                 new { RequestingUserId = currentUser.UserId, TaskId = taskId }
             );
 

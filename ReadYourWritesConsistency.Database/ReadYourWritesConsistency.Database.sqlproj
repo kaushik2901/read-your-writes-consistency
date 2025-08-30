@@ -68,21 +68,20 @@
     <Build Include="dbo\Tables\ProjectMembers.sql" />
     <Build Include="dbo\Tables\Tasks.sql" />
     <Build Include="dbo\User Defined Types\UserIdList.sql" />
-    <Build Include="dbo\Stored Procedures\Projects_GetDashboard.sql" />
-    <Build Include="dbo\Stored Procedures\Project_GetTasks.sql" />
-    <Build Include="dbo\Stored Procedures\Task_Create.sql" />
-    <Build Include="dbo\Stored Procedures\Task_Update.sql" />
-    <Build Include="dbo\Stored Procedures\Task_Delete.sql" />
-    <Build Include="dbo\Stored Procedures\Project_Create.sql" />
-    <Build Include="dbo\Stored Procedures\Project_Get.sql" />
-    <Build Include="dbo\Stored Procedures\Project_Update.sql" />
-    <Build Include="dbo\Stored Procedures\Project_Delete.sql" />
-    <Build Include="dbo\Stored Procedures\Users_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\Projects_GetDashboard_V1.sql" />
+    <Build Include="dbo\Stored Procedures\Project_GetTasks_V1.sql" />
+    <Build Include="dbo\Stored Procedures\Task_Create_V1.sql" />
+    <Build Include="dbo\Stored Procedures\Task_Update_V1.sql" />
+    <Build Include="dbo\Stored Procedures\Task_Delete_V1.sql" />
+    <Build Include="dbo\Stored Procedures\Project_Create_V1.sql" />
+    <Build Include="dbo\Stored Procedures\Project_Get_V1.sql" />
+    <Build Include="dbo\Stored Procedures\Project_Update_V1.sql" />
+    <Build Include="dbo\Stored Procedures\Project_Delete_V1.sql" />
+    <Build Include="dbo\Stored Procedures\Users_GetAll_V1.sql" />
     <Build Include="dbo\Indexes\IX_Tasks_ProjectId.sql" />
     <Build Include="dbo\Indexes\IX_Tasks_AssignedUserId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Stored Procedures\SeedData_Upsert.sql" />
   </ItemGroup>
-  
 </Project>

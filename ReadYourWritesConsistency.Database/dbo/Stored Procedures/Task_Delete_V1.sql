@@ -1,9 +1,6 @@
-CREATE PROCEDURE [dbo].[Task_Update]
+CREATE PROCEDURE [dbo].[Task_Delete_V1]
     @RequestingUserId INT,
-    @TaskId INT,
-    @Name NVARCHAR(200),
-    @Status NVARCHAR(50),
-    @AssignedUserId INT
+    @TaskId INT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -26,12 +23,7 @@ BEGIN
         RETURN;
     END
 
-    UPDATE [dbo].[Tasks]
-    SET 
-        [Name] = COALESCE(@Name, [Name]),
-        [Status] = COALESCE(@Status, [Status]),
-        [AssignedUserId] = COALESCE(@AssignedUserId, [AssignedUserId]),
-        [LastModifiedAtUtc] = SYSUTCDATETIME()
+    DELETE FROM [dbo].[Tasks]
     WHERE [Id] = @TaskId;
 
     UPDATE [dbo].[Projects]

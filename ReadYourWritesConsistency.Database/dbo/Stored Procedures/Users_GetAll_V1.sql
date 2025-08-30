@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[Users_GetAll]
+CREATE PROCEDURE [dbo].[Users_GetAll_V1]
 AS
 BEGIN
     SET NOCOUNT ON;

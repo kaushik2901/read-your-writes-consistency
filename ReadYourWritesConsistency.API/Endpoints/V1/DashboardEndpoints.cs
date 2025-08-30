@@ -20,7 +20,7 @@ public static class DashboardEndpoints
         var result = await dbFactory
             .Create()
             .QueryStoredProcAsync<DashboardProjectDto>(
-                "[dbo].[Projects_GetDashboard]",
+                "[dbo].[Projects_GetDashboard_V1]",
                 new { RequestingUserId = currentUser.UserId }
             );
 

@@ -18,7 +18,7 @@ public static class UserEndpoints
     {
         var result = await dbFactory
             .Create()
-            .QueryStoredProcAsync<UserDto>("[dbo].[Users_GetAll]");
+            .QueryStoredProcAsync<UserDto>("[dbo].[Users_GetAll_V1]");
 
         return result.IsSuccess
             ? Results.Ok(Result<IEnumerable<UserDto>>.Success(result.Value!, result.DbSource))

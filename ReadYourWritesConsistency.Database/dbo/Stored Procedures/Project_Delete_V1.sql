@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[Project_Delete]
+CREATE PROCEDURE [dbo].[Project_Delete_V1]
     @RequestingUserId INT,
     @ProjectId INT
 AS
