@@ -1,10 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApiBase } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAppState } from '@/state/AppState';
-import { Calendar } from 'lucide-react';
+import { Calendar, Plus } from 'lucide-react';
+import { CreateProjectModal } from '@/components/CreateProjectModal';
+import { useState } from 'react';
 
 type DashboardProject = {
   id: number;
@@ -15,9 +17,19 @@ type DashboardProject = {
   lastUpdatedAtUtc: string;
 };
 
+type User = {
+  id: number;
+  displayName: string;
+};
+
 export function DashboardPage() {
   const { api } = useApiBase();
   const { userId, consistencyMode, setLastIntent } = useAppState();
+  const queryClient = useQueryClient();
+  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
+
+  const openCreateProjectModal = () => setIsCreateProjectModalOpen(true);
+  const closeCreateProjectModal = () => setIsCreateProjectModalOpen(false);
 
   const { data, isLoading, error } = useQuery<DashboardProject[]>({
     queryKey: ['dashboard', userId, consistencyMode], // Added userId and consistencyMode to the query key
@@ -27,6 +39,41 @@ export function DashboardPage() {
       return response.value ?? [];
     },
   });
+
+  const { data: users } = useQuery<User[]>({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await api<User[]>('/users');
+      setLastIntent(response.dbSource);
+      console.log(response.value);
+
+      return response.value ?? [];
+    },
+  });
+
+  const createProject = async (projectData: { name: string; memberUserIds: number[] }) => {
+    try {
+      const response = await api('/projects', {
+        method: 'POST',
+        body: {
+          name: projectData.name,
+          memberUserIds: projectData.memberUserIds,
+        },
+      });
+
+      if (response.isSuccess) {
+        // Refresh the dashboard data
+        queryClient.invalidateQueries({
+          queryKey: ['dashboard', userId, consistencyMode],
+        });
+        closeCreateProjectModal();
+      } else {
+        console.error('Failed to create project:', response.error);
+      }
+    } catch (error) {
+      console.error('Error creating project:', error);
+    }
+  };
 
   if (isLoading)
     return (
@@ -45,6 +92,13 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <Button onClick={openCreateProjectModal}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Project
+        </Button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {data.map(p => (
           <Card key={p.id} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
@@ -87,6 +141,12 @@ export function DashboardPage() {
           </Card>
         ))}
       </div>
+      <CreateProjectModal
+        open={isCreateProjectModalOpen}
+        onClose={closeCreateProjectModal}
+        onSubmit={createProject}
+        users={users || []}
+      />
     </div>
   );
 }
