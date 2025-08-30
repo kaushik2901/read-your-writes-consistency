@@ -3,15 +3,8 @@ using ReadYourWritesConsistency.API.Persistence;
 
 namespace ReadYourWritesConsistency.API.Middlewares;
 
-public sealed class DbIntentMiddleware
+public sealed class DbIntentMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public DbIntentMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task InvokeAsync(HttpContext context, IDbIntentAccessor accessor)
     {
         // Decide intent: default read; switch to write on methods that modify state
@@ -27,7 +20,7 @@ public sealed class DbIntentMiddleware
             accessor.Intent = DbIntent.Write;
         }
 
-        await _next(context);
+        await next(context);
     }
 }
 

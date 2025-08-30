@@ -5,9 +5,10 @@ using ReadYourWritesConsistency.API.Models;
 
 namespace ReadYourWritesConsistency.API.Persistence;
 
-public sealed class ReadWriteDbContext : IReadWriteDbContext
+public sealed class ReadWriteDbContext
 {
     private readonly string _connectionString;
+    private readonly string _dbSource = "Master";
 
     public ReadWriteDbContext(IConfiguration configuration)
     {
@@ -25,15 +26,15 @@ public sealed class ReadWriteDbContext : IReadWriteDbContext
         {
             using IDbConnection conn = CreateConnection();
             await conn.ExecuteAsync(storedProc, parameters, commandType: CommandType.StoredProcedure);
-            return Result.Success("Master");
+            return Result.Success(_dbSource);
         }
         catch (SqlException ex)
         {
-            return Result.Failure(ex.Message, "Master");
+            return Result.Failure(ex.Message, _dbSource);
         }
         catch (Exception ex)
         {
-            return Result.Failure(ex.Message, "Master");
+            return Result.Failure(ex.Message, _dbSource);
         }
     }
 
@@ -43,15 +44,15 @@ public sealed class ReadWriteDbContext : IReadWriteDbContext
         {
             using IDbConnection conn = CreateConnection();
             var rows = await conn.QueryAsync<T>(storedProc, parameters, commandType: CommandType.StoredProcedure);
-            return Result<IEnumerable<T>>.Success(rows, "Master");
+            return Result<IEnumerable<T>>.Success(rows, _dbSource);
         }
         catch (SqlException ex)
         {
-            return Result<IEnumerable<T>>.Failure(ex.Message, "Master");
+            return Result<IEnumerable<T>>.Failure(ex.Message, _dbSource);
         }
         catch (Exception ex)
         {
-            return Result<IEnumerable<T>>.Failure(ex.Message, "Master");
+            return Result<IEnumerable<T>>.Failure(ex.Message, _dbSource);
         }
     }
 }

@@ -13,8 +13,8 @@ public sealed record Result
         DbSource = dbSource;
     }
 
-    public static Result Success(string? dbSource = null) => new(true, null, dbSource);
-    public static Result Failure(string error, string? dbSource = null) => new(false, error, dbSource);
+    public static Result Success(string dbSource) => new(true, null, dbSource);
+    public static Result Failure(string error, string dbSource) => new(false, error, dbSource);
 }
 
 public sealed record Result<T>
@@ -32,8 +32,7 @@ public sealed record Result<T>
         DbSource = dbSource;
     }
 
-    public static Result<T> Success(T value, string? dbSource = null) => new(true, value, null, dbSource);
-    public static Result<T> Failure(string error, string? dbSource = null) => new(false, default, error, dbSource);
+    public static Result<T> Success(T value, string dbSource) => new(true, value, null, dbSource);
+    public static Result<T> Failure(string error, string dbSource) => new(false, default, error, dbSource);
 }
-
 

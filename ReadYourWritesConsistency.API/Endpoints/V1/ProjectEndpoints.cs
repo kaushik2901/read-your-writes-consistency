@@ -27,11 +27,12 @@ public static class ProjectEndpoints
             new { RequestingUserId = currentUser.UserId, ProjectId = projectId },
             commandType: System.Data.CommandType.StoredProcedure);
 
-        var (Id, Name, CreatedByUserId, LastUpdatedAtUtc) = await multi.ReadFirstOrDefaultAsync<(int Id, string Name, int CreatedByUserId, DateTime LastUpdatedAtUtc)>();
-        if (Id == 0) return Results.Ok(Result.Failure("Project not found", "Replica"));
+        var projectMetaDataDto = await multi.ReadFirstOrDefaultAsync<ProjectMetaDataDto>();
+        if (projectMetaDataDto == null || projectMetaDataDto.Id == 0)
+            return Results.Ok(Result.Failure("Project not found", "Replica"));
 
-        var members = (await multi.ReadAsync<ProjectMemberDto>()).ToList();
-        var dto = new ProjectDto(Id, Name, CreatedByUserId, LastUpdatedAtUtc, members);
+        var members = await multi.ReadAsync<ProjectMemberDto>();
+        var dto = new ProjectDto(projectMetaDataDto, [.. members]);
 
         return Results.Ok(Result<ProjectDto>.Success(dto, "Replica"));
     }

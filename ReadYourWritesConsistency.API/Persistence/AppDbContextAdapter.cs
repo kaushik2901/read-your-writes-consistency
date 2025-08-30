@@ -4,15 +4,15 @@ namespace ReadYourWritesConsistency.API.Persistence;
 
 internal sealed class AppDbContextAdapter : IAppDbContext
 {
-    private readonly IReadDbContext? _read;
-    private readonly IReadWriteDbContext? _write;
+    private readonly ReadDbContext? _read;
+    private readonly ReadWriteDbContext? _write;
 
-    public AppDbContextAdapter(IReadDbContext read)
+    public AppDbContextAdapter(ReadDbContext read)
     {
         _read = read;
     }
 
-    public AppDbContextAdapter(IReadWriteDbContext write)
+    public AppDbContextAdapter(ReadWriteDbContext write)
     {
         _write = write;
     }

@@ -5,20 +5,13 @@ public interface ICurrentUserAccessor
     int UserId { get; }
 }
 
-public sealed class CurrentUserAccessor : ICurrentUserAccessor
+public sealed class CurrentUserAccessor(IHttpContextAccessor httpContextAccessor) : ICurrentUserAccessor
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public CurrentUserAccessor(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
-
     public int UserId
     {
         get
         {
-            var http = _httpContextAccessor.HttpContext;
+            var http = httpContextAccessor.HttpContext;
             if (http != null && http.Request.Headers.TryGetValue("X-User-Id", out var values) &&
                 int.TryParse(values.ToString(), out var id))
             {

@@ -12,14 +12,9 @@ public sealed record DashboardProjectDto
 
 public sealed record ProjectDto
 (
-    int Id,
-    string Name,
-    int CreatedByUserId,
-    DateTime LastUpdatedAtUtc,
+    ProjectMetaDataDto ProjectMetaData,
     IReadOnlyList<ProjectMemberDto> Members
 );
-
-public sealed record ProjectMemberDto(int UserId, string DisplayName);
 
 public sealed record TaskListItemDto
 (
@@ -30,6 +25,8 @@ public sealed record TaskListItemDto
     DateTime LastModifiedAtUtc
 );
 
+public sealed record ProjectMemberDto(int UserId, string DisplayName);
+public sealed record ProjectMetaDataDto(int Id, string Name, int CreatedByUserId, DateTime LastUpdatedAtUtc);
 public sealed record UserDto(int Id, string UserName, string DisplayName);
 public sealed record CreateProjectRequest(string Name, IReadOnlyList<int> MemberUserIds);
 public sealed record UpdateProjectRequest(string? Name, IReadOnlyList<int>? MemberUserIds);
