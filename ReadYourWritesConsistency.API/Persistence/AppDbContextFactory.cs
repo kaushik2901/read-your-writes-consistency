@@ -1,3 +1,5 @@
+using ReadYourWritesConsistency.API.Models;
+
 namespace ReadYourWritesConsistency.API.Persistence;
 
 public sealed class AppDbContextFactory : IAppDbContextFactory

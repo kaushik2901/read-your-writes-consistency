@@ -1,3 +1,4 @@
+using ReadYourWritesConsistency.API.Models;
 using ReadYourWritesConsistency.API.Persistence;
 
 namespace ReadYourWritesConsistency.API.Middlewares;

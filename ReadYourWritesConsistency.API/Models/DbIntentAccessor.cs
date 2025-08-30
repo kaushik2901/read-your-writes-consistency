@@ -1,4 +1,6 @@
-namespace ReadYourWritesConsistency.API.Persistence;
+using ReadYourWritesConsistency.API.Persistence;
+
+namespace ReadYourWritesConsistency.API.Models;
 
 public sealed class DbIntentAccessor : IDbIntentAccessor
 {

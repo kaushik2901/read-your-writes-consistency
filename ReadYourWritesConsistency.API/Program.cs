@@ -1,6 +1,7 @@
 using ReadYourWritesConsistency.API.Endpoints.V1;
 using ReadYourWritesConsistency.API.Endpoints.V2;
 using ReadYourWritesConsistency.API.Middlewares;
+using ReadYourWritesConsistency.API.Models;
 using ReadYourWritesConsistency.API.Persistence;
 using ReadYourWritesConsistency.API.Services;
 
