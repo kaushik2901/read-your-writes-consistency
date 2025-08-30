@@ -80,6 +80,7 @@
     <Build Include="dbo\Stored Procedures\Users_GetAll_V1.sql" />
     <Build Include="dbo\Indexes\IX_Tasks_ProjectId.sql" />
     <Build Include="dbo\Indexes\IX_Tasks_AssignedUserId.sql" />
+    <Build Include="dbo\Stored Procedures\System_GetCurrentLSN.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Stored Procedures\SeedData_Upsert.sql" />
