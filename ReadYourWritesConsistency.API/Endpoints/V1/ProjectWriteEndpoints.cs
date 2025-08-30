@@ -2,95 +2,94 @@ using System.Data;
 using Dapper;
 using ReadYourWritesConsistency.API.Models;
 using ReadYourWritesConsistency.API.Services;
+using static Dapper.SqlMapper;
 
 namespace ReadYourWritesConsistency.API.Endpoints.V1;
 
 public static class ProjectWriteEndpoints
 {
-	public static RouteGroupBuilder MapV1ProjectWrites(this IEndpointRouteBuilder app)
-	{
-		var group = app.MapGroup("/api/v1/projects");
+    public static RouteGroupBuilder MapV1ProjectWrites(this IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/projects");
 
-		group.MapPost("", async (CreateProjectRequest req, ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory) =>
-		{
-			int requestingUserId = currentUser.UserId;
+        group.MapPost("", GetProjectsAsync);
 
-			// Create table-valued parameter for UserIdList
-			var tvp = new DataTable();
-			tvp.Columns.Add("UserId", typeof(int));
-			if (req.MemberUserIds != null)
-			{
-				foreach (var id in req.MemberUserIds.Distinct())
-				{
-					tvp.Rows.Add(id);
-				}
-			}
+        group.MapPut("/{projectId:int}", UpdateProjectAsync);
 
-			var parameters = new Dapper.DynamicParameters();
-			parameters.Add("RequestingUserId", requestingUserId, DbType.Int32);
-			parameters.Add("Name", req.Name, DbType.String);
-			parameters.Add("MemberUserIds", tvp.AsTableValuedParameter("dbo.UserIdList"));
+        group.MapDelete("/{projectId:int}", DeleteProjectAsync);
 
-			var db = dbFactory.Create();
-			var result = await db.ExecuteStoredProcAsync(
-				"[dbo].[Project_Create]",
-				parameters);
-			return result.IsSuccess 
-				? Results.Ok(Result.Success(result.DbSource)) 
-				: Results.BadRequest(Result.Failure(result.Error!, result.DbSource));
-		});
+        return group;
+    }
 
-		group.MapPut("/{projectId:int}", async (int projectId, UpdateProjectRequest req, ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory) =>
-		{
-			int requestingUserId = currentUser.UserId;
+    private static async Task<IResult> GetProjectsAsync(CreateProjectRequest req, ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("RequestingUserId", currentUser.UserId, DbType.Int32);
+        parameters.Add("Name", req.Name, DbType.String);
+        parameters.Add("MemberUserIds", CreateUserIdList(req.MemberUserIds));
 
-			DataTable? tvp = null;
-			if (req.MemberUserIds != null)
-			{
-				tvp = new DataTable();
-				tvp.Columns.Add("UserId", typeof(int));
-				foreach (var id in req.MemberUserIds.Distinct())
-				{
-					tvp.Rows.Add(id);
-				}
-			}
+        var result = await dbFactory
+            .Create()
+            .ExecuteStoredProcAsync(
+                "[dbo].[Project_Create]",
+                parameters
+            );
 
-			var parameters = new Dapper.DynamicParameters();
-			parameters.Add("RequestingUserId", requestingUserId, DbType.Int32);
-			parameters.Add("ProjectId", projectId, DbType.Int32);
-			parameters.Add("Name", req.Name, DbType.String);
-			if (tvp != null)
-			{
-				parameters.Add("MemberUserIds", tvp.AsTableValuedParameter("dbo.UserIdList"));
-			}
-			else
-			{
-				parameters.Add("MemberUserIds", null);
-			}
+        return result.IsSuccess
+            ? Results.Ok(Result.Success(result.DbSource))
+            : Results.BadRequest(Result.Failure(result.Error!, result.DbSource));
+    }
 
-			var db = dbFactory.Create();
-			var result = await db.ExecuteStoredProcAsync(
-				"[dbo].[Project_Update]",
-				parameters);
-			return result.IsSuccess 
-				? Results.Ok(Result.Success(result.DbSource)) 
-				: Results.BadRequest(Result.Failure(result.Error!, result.DbSource));
-		});
+    private static async Task<IResult> UpdateProjectAsync(int projectId, UpdateProjectRequest req, ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("RequestingUserId", currentUser.UserId, DbType.Int32);
+        parameters.Add("ProjectId", projectId, DbType.Int32);
+        parameters.Add("Name", req.Name, DbType.String);
+        parameters.Add("MemberUserIds", CreateUserIdList(req.MemberUserIds));
 
-		group.MapDelete("/{projectId:int}", async (int projectId, ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory) =>
-		{
-			int requestingUserId = currentUser.UserId;
-			var db = dbFactory.Create();
-			var result = await db.ExecuteStoredProcAsync(
-				"[dbo].[Project_Delete]",
-				new { RequestingUserId = requestingUserId, ProjectId = projectId });
-			return result.IsSuccess 
-				? Results.Ok(Result.Success(result.DbSource)) 
-				: Results.BadRequest(Result.Failure(result.Error!, result.DbSource));
-		});
+        var result = await dbFactory
+            .Create()
+            .ExecuteStoredProcAsync(
+                "[dbo].[Project_Update]",
+                parameters
+            );
 
-		return group;
-	}
+        return result.IsSuccess
+            ? Results.Ok(Result.Success(result.DbSource))
+            : Results.BadRequest(Result.Failure(result.Error!, result.DbSource));
+    }
+
+    private static async Task<IResult> DeleteProjectAsync(int projectId, ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory)
+    {
+        var result = await dbFactory
+            .Create()
+            .ExecuteStoredProcAsync(
+                "[dbo].[Project_Delete]",
+                new { RequestingUserId = currentUser.UserId, ProjectId = projectId }
+            );
+
+        return result.IsSuccess
+            ? Results.Ok(Result.Success(result.DbSource))
+            : Results.BadRequest(Result.Failure(result.Error!, result.DbSource));
+    }
+
+    private static ICustomQueryParameter? CreateUserIdList(IReadOnlyList<int>? memberUserIds)
+    {
+        var tvp = new DataTable();
+
+        tvp.Columns.Add("UserId", typeof(int));
+
+        if (memberUserIds != null)
+        {
+            foreach (var id in memberUserIds.Distinct())
+            {
+                tvp.Rows.Add(id);
+            }
+        }
+
+        return tvp?.AsTableValuedParameter("dbo.UserIdList") ?? null;
+    }
 }
 
 
