@@ -15,7 +15,7 @@ BEGIN
     END
 
     SELECT
-        t.[Id], t.[Name], t.[Status], u.[DisplayName] AS [UserName], t.[LastModifiedAtUtc]
+        t.[Id], t.[Name], t.[Status], u.[Id] AS [AssignedUserId], u.[DisplayName] AS [UserName], t.[LastModifiedAtUtc]
     FROM [dbo].[Tasks] t
     LEFT JOIN [dbo].[Users] u ON u.[Id] = t.[AssignedUserId]
     WHERE t.[ProjectId] = @ProjectId

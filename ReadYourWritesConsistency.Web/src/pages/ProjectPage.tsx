@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApiBase } from '@/lib/api';
 import { useAppState } from '@/state/AppState';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Calendar, Pencil, Plus, Trash2 } from 'lucide-react';
+import { TaskModal } from '@/components/TaskModal';
+import { UpdateTaskModal } from '@/components/UpdateTaskModal';
+import { useState } from 'react';
 
 type Project = {
   projectMetaData: { id: number; name: string; createdByUserId: number; lastUpdatedAtUtc: string };
@@ -23,13 +26,31 @@ type TaskItem = {
   id: number;
   name: string;
   status: string;
-  userName: string;
+  assignedUserId: string;
+  userName: string | null;
+  lastModifiedAtUtc: string;
 };
 
 export function ProjectPage() {
   const { projectId = '' } = useParams();
   const { api } = useApiBase();
   const { userId, consistencyMode, setLastIntent } = useAppState();
+  const queryClient = useQueryClient();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
+
+  const openAddModal = () => setIsAddModalOpen(true);
+  const closeAddModal = () => setIsAddModalOpen(false);
+
+  const openUpdateModal = (task: TaskItem) => {
+    setSelectedTask(task);
+    setIsUpdateModalOpen(true);
+  };
+  const closeUpdateModal = () => {
+    setIsUpdateModalOpen(false);
+    setSelectedTask(null);
+  };
 
   const { data: project, isLoading: loadingProject } = useQuery<Project>({
     queryKey: ['project', projectId, userId, consistencyMode],
@@ -55,6 +76,62 @@ export function ProjectPage() {
     },
     enabled: !!projectId,
   });
+
+  const createTask = async (task: { name: string; assignedUserId: number }) => {
+    try {
+      const response = await api(`/tasks`, {
+        method: 'POST',
+        body: {
+          projectId,
+          name: task.name,
+          assignedUserId: task.assignedUserId,
+          status: 'New',
+        },
+      });
+
+      if (response.isSuccess) {
+        // Refresh the tasks list
+        queryClient.invalidateQueries({
+          queryKey: ['projectTasks', projectId, userId, consistencyMode],
+        });
+        closeAddModal();
+      } else {
+        console.error('Failed to create task:', response.error);
+      }
+    } catch (error) {
+      console.error('Error creating task:', error);
+    }
+  };
+
+  const updateTask = async (task: {
+    id: number;
+    name: string;
+    status: string;
+    assignedUserId: number;
+  }) => {
+    try {
+      const response = await api(`/tasks/${task.id}`, {
+        method: 'PUT',
+        body: {
+          name: task.name,
+          status: task.status,
+          assignedUserId: task.assignedUserId,
+        },
+      });
+
+      if (response.isSuccess) {
+        // Refresh the tasks list
+        queryClient.invalidateQueries({
+          queryKey: ['projectTasks', projectId, userId, consistencyMode],
+        });
+        closeUpdateModal();
+      } else {
+        console.error('Failed to update task:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
+  };
 
   if (loadingProject || loadingTasks)
     return (
@@ -115,7 +192,7 @@ export function ProjectPage() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Tasks</h2>
-          <Button size="sm" onClick={() => {}}>
+          <Button size="sm" onClick={openAddModal}>
             <Plus className="mr-2 h-4 w-4" />
             Add Task
           </Button>
@@ -130,7 +207,7 @@ export function ProjectPage() {
         {!tasks || tasks.length === 0 ? (
           <div className="text-center p-8 bg-muted rounded-lg">
             <p className="text-muted-foreground">No tasks found for this project.</p>
-            <Button className="mt-4" onClick={() => {}}>
+            <Button className="mt-4" onClick={openAddModal}>
               <Plus className="mr-2 h-4 w-4" />
               Create Your First Task
             </Button>
@@ -160,15 +237,15 @@ export function ProjectPage() {
                     </TableCell>
                     <TableCell>{t.userName}</TableCell>
                     <TableCell>
-                      {new Date(project.projectMetaData.lastUpdatedAtUtc).toLocaleDateString()} at{' '}
-                      {new Date(project.projectMetaData.lastUpdatedAtUtc).toLocaleTimeString([], {
+                      {new Date(t.lastModifiedAtUtc).toLocaleDateString()} at{' '}
+                      {new Date(t.lastModifiedAtUtc).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => {}}>
+                        <Button variant="outline" size="sm" onClick={() => openUpdateModal(t)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => {}}>
@@ -183,6 +260,13 @@ export function ProjectPage() {
           </div>
         )}
       </div>
+      <TaskModal open={isAddModalOpen} onClose={closeAddModal} onSubmit={createTask} />
+      <UpdateTaskModal
+        open={isUpdateModalOpen}
+        onClose={closeUpdateModal}
+        onSubmit={updateTask}
+        task={selectedTask}
+      />
     </div>
   );
 }

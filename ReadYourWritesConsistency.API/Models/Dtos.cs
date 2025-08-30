@@ -21,6 +21,7 @@ public sealed record TaskListItemDto
     int Id,
     string Name,
     string Status,
+    int AssignedUserId,
     string? UserName,
     DateTime LastModifiedAtUtc
 );
@@ -30,7 +31,7 @@ public sealed record ProjectMetaDataDto(int Id, string Name, int CreatedByUserId
 public sealed record UserDto(int Id, string UserName, string DisplayName);
 public sealed record CreateProjectRequest(string Name, IReadOnlyList<int> MemberUserIds);
 public sealed record UpdateProjectRequest(string? Name, IReadOnlyList<int>? MemberUserIds);
-public sealed record CreateTaskRequest(int ProjectId, string Name, int? AssignedUserId, string Status);
-public sealed record UpdateTaskRequest(int TaskId, string? Name, string? Status, int? AssignedUserId);
+public sealed record CreateTaskRequest(int ProjectId, string Name, int AssignedUserId, string Status);
+public sealed record UpdateTaskRequest(string? Name, string? Status, int? AssignedUserId);
 
 
