@@ -26,6 +26,11 @@ type Project = {
   members: { userId: number; displayName: string }[];
 };
 
+type User = {
+  id: number;
+  displayName: string;
+};
+
 export function ProjectPage() {
   const navigate = useNavigate();
   const { projectId = '' } = useParams();
@@ -89,6 +94,15 @@ export function ProjectPage() {
       return response.value ?? [];
     },
     enabled: !!projectId,
+  });
+
+  const { data: users = [] } = useQuery<User[]>({
+    queryKey: ['users', consistencyMode],
+    queryFn: async () => {
+      const response = await api<User[]>('/users');
+      setLastIntent(response.dbSource);
+      return response.value ?? [];
+    },
   });
 
   const createTask = async (task: { name: string; assignedUserId: number }) => {
@@ -167,12 +181,13 @@ export function ProjectPage() {
     }
   };
 
-  const updateProject = async (projectData: { name: string }) => {
+  const updateProject = async (projectData: { name: string; memberUserIds: number[] }) => {
     try {
       const response = await api(`/projects/${projectId}`, {
         method: 'PUT',
         body: {
           name: projectData.name,
+          memberUserIds: projectData.memberUserIds,
         },
       });
 
@@ -355,7 +370,8 @@ export function ProjectPage() {
         open={isEditProjectModalOpen}
         onClose={closeEditProjectModal}
         onSubmit={updateProject}
-        project={project ? { name: project.projectMetaData.name } : null}
+        project={project ? { name: project.projectMetaData.name, members: project.members } : null}
+        users={users}
       />
       <DeleteProjectModal
         open={isDeleteProjectModalOpen}
