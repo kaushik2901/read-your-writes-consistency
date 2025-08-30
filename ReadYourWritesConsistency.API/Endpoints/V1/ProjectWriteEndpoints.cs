@@ -1,6 +1,7 @@
 using System.Data;
 using Dapper;
 using ReadYourWritesConsistency.API.Models;
+using ReadYourWritesConsistency.API.Persistence;
 using ReadYourWritesConsistency.API.Services;
 using static Dapper.SqlMapper;
 

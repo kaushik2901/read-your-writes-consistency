@@ -1,4 +1,5 @@
 using ReadYourWritesConsistency.API.Models;
+using ReadYourWritesConsistency.API.Persistence;
 
 namespace ReadYourWritesConsistency.API.Endpoints.V1;
 

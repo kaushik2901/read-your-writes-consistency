@@ -1,48 +1,6 @@
-using ReadYourWritesConsistency.API.Services;
+using ReadYourWritesConsistency.API.Models;
 
-namespace ReadYourWritesConsistency.API.Models;
-
-public enum DbIntent
-{
-    Read,
-    Write
-}
-
-public interface IDbIntentAccessor
-{
-    DbIntent Intent { get; set; }
-}
-
-public sealed class DbIntentAccessor : IDbIntentAccessor
-{
-    public DbIntent Intent { get; set; } = DbIntent.Read;
-}
-
-public interface IAppDbContextFactory
-{
-    IAppDbContext Create();
-}
-
-public sealed class AppDbContextFactory : IAppDbContextFactory
-{
-    private readonly IDbIntentAccessor _intentAccessor;
-    private readonly IReadDbContext _read;
-    private readonly IReadWriteDbContext _write;
-
-    public AppDbContextFactory(IDbIntentAccessor intentAccessor, IReadDbContext read, IReadWriteDbContext write)
-    {
-        _intentAccessor = intentAccessor;
-        _read = read;
-        _write = write;
-    }
-
-    public IAppDbContext Create()
-    {
-        return _intentAccessor.Intent == DbIntent.Read
-            ? new AppDbContextAdapter(_read)
-            : new AppDbContextAdapter(_write);
-    }
-}
+namespace ReadYourWritesConsistency.API.Persistence;
 
 internal sealed class AppDbContextAdapter : IAppDbContext
 {
