@@ -22,10 +22,9 @@ export function DashboardPage() {
   const { data, isLoading, error } = useQuery<DashboardProject[]>({
     queryKey: ['dashboard', userId, consistencyMode], // Added userId and consistencyMode to the query key
     queryFn: async () => {
-      const projects = await api<DashboardProject[]>('/dashboard');
-      // For dashboard, we'll set the intent to read since it's typically a read operation
-      setLastIntent('read');
-      return projects;
+      const response = await api<DashboardProject[]>('/dashboard');
+      setLastIntent(response.dbSource);
+      return response.value ?? [];
     },
   });
 

@@ -5,7 +5,7 @@ export type Result<T> = {
   isSuccess: boolean;
   error: string | null;
   value: T | null;
-  dbSource: string | null;
+  dbSource: string;
 };
 
 // Helper function to normalize the Result object from either PascalCase or camelCase
@@ -14,7 +14,7 @@ function normalizeResult<T>(result: any): Result<T> {
     isSuccess: result.IsSuccess ?? result.isSuccess ?? false,
     error: result.Error ?? result.error ?? null,
     value: result.Value ?? result.value ?? null,
-    dbSource: result.DbSource ?? result.dbSource ?? null,
+    dbSource: result.DbSource ?? result.dbSource ?? '',
   };
 }
 
@@ -28,12 +28,9 @@ type FetchOptions = {
 
 export function useApiBase() {
   const { userId, consistencyMode } = useAppState();
-
-  console.log('API userId:', userId);
-
   const baseUrl = consistencyMode === 'ryw' ? '/api/v2' : '/api/v1';
 
-  async function api<T>(path: string, options: FetchOptions = {}): Promise<T> {
+  async function api<T>(path: string, options: FetchOptions = {}): Promise<Result<T>> {
     const method = options.method ?? 'GET';
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -59,7 +56,7 @@ export function useApiBase() {
       if (!result.isSuccess) {
         throw new Error(result.error || 'Request failed');
       }
-      return result.value as T;
+      return result;
     }
 
     // @ts-expect-error allow void

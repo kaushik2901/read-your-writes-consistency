@@ -7,8 +7,8 @@ type AppState = {
   setUserId: (id: number) => void;
   consistencyMode: ConsistencyMode;
   setConsistencyMode: (m: ConsistencyMode) => void;
-  lastIntent: 'read' | 'write';
-  setLastIntent: (i: 'read' | 'write') => void;
+  lastIntent: string;
+  setLastIntent: (i: string) => void;
 };
 
 const Ctx = createContext<AppState | null>(null);
@@ -16,9 +16,9 @@ const Ctx = createContext<AppState | null>(null);
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [userId, setUserId] = useState<number>(1);
   const [consistencyMode, setConsistencyMode] = useState<ConsistencyMode>('none');
-  const [lastIntent, _setLastIntent] = useState<'read' | 'write'>('read');
+  const [lastIntent, _setLastIntent] = useState<string>('');
 
-  const setLastIntent = useCallback((i: 'read' | 'write') => {
+  const setLastIntent = useCallback((i: string) => {
     _setLastIntent(i);
   }, []);
 

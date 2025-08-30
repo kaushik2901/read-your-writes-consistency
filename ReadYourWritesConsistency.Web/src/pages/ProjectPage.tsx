@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useApiBase } from '@/lib/api';
 import { useAppState } from '@/state/AppState';
 import { Badge } from '@/components/ui/badge';
@@ -40,9 +40,10 @@ export function ProjectPage() {
   } = useQuery<Project>({
     queryKey: ['project', projectId, userId, consistencyMode],
     queryFn: async () => {
-      const projectData = await api<Project>(`/projects/${projectId}`);
-      setLastIntent('read');
-      return projectData;
+      const response = await api<Project>(`/projects/${projectId}`);
+      setLastIntent(response.dbSource);
+      if (!response.value) throw new Error('Project not found');
+      return response.value;
     },
     enabled: !!projectId,
   });
@@ -54,9 +55,9 @@ export function ProjectPage() {
   } = useQuery<TaskItem[]>({
     queryKey: ['projectTasks', projectId, userId, consistencyMode],
     queryFn: async () => {
-      const tasksData = await api<TaskItem[]>(`/projects/${projectId}/tasks`);
-      setLastIntent('read');
-      return tasksData;
+      const response = await api<TaskItem[]>(`/projects/${projectId}/tasks`);
+      setLastIntent(response.dbSource);
+      return response.value ?? [];
     },
     enabled: !!projectId,
   });
