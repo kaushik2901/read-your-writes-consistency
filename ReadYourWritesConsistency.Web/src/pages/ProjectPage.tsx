@@ -15,20 +15,13 @@ import {
 import { Calendar, Pencil, Plus, Trash2 } from 'lucide-react';
 import { TaskModal } from '@/components/TaskModal';
 import { UpdateTaskModal } from '@/components/UpdateTaskModal';
+import { DeleteTaskModal } from '@/components/DeleteTaskModal';
+import type { TaskItem } from '@/types/TaskItem';
 import { useState } from 'react';
 
 type Project = {
   projectMetaData: { id: number; name: string; createdByUserId: number; lastUpdatedAtUtc: string };
   members: { userId: number; displayName: string }[];
-};
-
-type TaskItem = {
-  id: number;
-  name: string;
-  status: string;
-  assignedUserId: string;
-  userName: string | null;
-  lastModifiedAtUtc: string;
 };
 
 export function ProjectPage() {
@@ -38,6 +31,7 @@ export function ProjectPage() {
   const queryClient = useQueryClient();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
 
   const openAddModal = () => setIsAddModalOpen(true);
@@ -49,6 +43,15 @@ export function ProjectPage() {
   };
   const closeUpdateModal = () => {
     setIsUpdateModalOpen(false);
+    setSelectedTask(null);
+  };
+
+  const openDeleteModal = (task: TaskItem) => {
+    setSelectedTask(task);
+    setIsDeleteModalOpen(true);
+  };
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
     setSelectedTask(null);
   };
 
@@ -130,6 +133,26 @@ export function ProjectPage() {
       }
     } catch (error) {
       console.error('Error updating task:', error);
+    }
+  };
+
+  const deleteTask = async (task: TaskItem) => {
+    try {
+      const response = await api(`/tasks/${task.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.isSuccess) {
+        // Refresh the tasks list
+        queryClient.invalidateQueries({
+          queryKey: ['projectTasks', projectId, userId, consistencyMode],
+        });
+        closeDeleteModal();
+      } else {
+        console.error('Failed to delete task:', response.error);
+      }
+    } catch (error) {
+      console.error('Error deleting task:', error);
     }
   };
 
@@ -248,7 +271,7 @@ export function ProjectPage() {
                         <Button variant="outline" size="sm" onClick={() => openUpdateModal(t)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => {}}>
+                        <Button variant="outline" size="sm" onClick={() => openDeleteModal(t)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -265,6 +288,12 @@ export function ProjectPage() {
         open={isUpdateModalOpen}
         onClose={closeUpdateModal}
         onSubmit={updateTask}
+        task={selectedTask}
+      />
+      <DeleteTaskModal
+        open={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onSubmit={deleteTask}
         task={selectedTask}
       />
     </div>
