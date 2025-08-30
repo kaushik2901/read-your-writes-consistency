@@ -16,6 +16,7 @@ import { Calendar, Pencil, Plus, Trash2 } from 'lucide-react';
 import { TaskModal } from '@/components/TaskModal';
 import { UpdateTaskModal } from '@/components/UpdateTaskModal';
 import { DeleteTaskModal } from '@/components/DeleteTaskModal';
+import { EditProjectModal } from '@/components/EditProjectModal';
 import type { TaskItem } from '@/types/TaskItem';
 import { useState } from 'react';
 
@@ -32,6 +33,7 @@ export function ProjectPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
 
   const openAddModal = () => setIsAddModalOpen(true);
@@ -54,6 +56,9 @@ export function ProjectPage() {
     setIsDeleteModalOpen(false);
     setSelectedTask(null);
   };
+
+  const openEditProjectModal = () => setIsEditProjectModalOpen(true);
+  const closeEditProjectModal = () => setIsEditProjectModalOpen(false);
 
   const { data: project, isLoading: loadingProject } = useQuery<Project>({
     queryKey: ['project', projectId, userId, consistencyMode],
@@ -156,6 +161,29 @@ export function ProjectPage() {
     }
   };
 
+  const updateProject = async (projectData: { name: string }) => {
+    try {
+      const response = await api(`/projects/${projectId}`, {
+        method: 'PUT',
+        body: {
+          name: projectData.name,
+        },
+      });
+
+      if (response.isSuccess) {
+        // Refresh the project data
+        queryClient.invalidateQueries({
+          queryKey: ['project', projectId, userId, consistencyMode],
+        });
+        closeEditProjectModal();
+      } else {
+        console.error('Failed to update project:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating project:', error);
+    }
+  };
+
   if (loadingProject || loadingTasks)
     return (
       <div className="flex justify-center items-center h-64">
@@ -204,7 +232,7 @@ export function ProjectPage() {
               </span>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => {}}>
+          <Button variant="outline" size="sm" onClick={openEditProjectModal}>
             <Pencil className="mr-2 h-4 w-4" />
             Edit Project
           </Button>
@@ -295,6 +323,12 @@ export function ProjectPage() {
         onClose={closeDeleteModal}
         onSubmit={deleteTask}
         task={selectedTask}
+      />
+      <EditProjectModal
+        open={isEditProjectModalOpen}
+        onClose={closeEditProjectModal}
+        onSubmit={updateProject}
+        project={project ? { name: project.projectMetaData.name } : null}
       />
     </div>
   );
