@@ -25,7 +25,13 @@ type EditProjectModalProps = {
   users: User[];
 };
 
-export function EditProjectModal({ open, onClose, onSubmit, project, users }: EditProjectModalProps) {
+export function EditProjectModal({
+  open,
+  onClose,
+  onSubmit,
+  project,
+  users,
+}: EditProjectModalProps) {
   const [name, setName] = useState(project?.name || '');
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>(
     project?.members.map(m => m.userId) || []
@@ -35,7 +41,7 @@ export function EditProjectModal({ open, onClose, onSubmit, project, users }: Ed
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    
+
     setIsSubmitting(true);
     try {
       await onSubmit({ name: name.trim(), memberUserIds: selectedUserIds });
@@ -77,7 +83,7 @@ export function EditProjectModal({ open, onClose, onSubmit, project, users }: Ed
               <Input
                 id="name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={e => setName(e.target.value)}
                 className="col-span-3"
                 disabled={isSubmitting}
               />

@@ -16,7 +16,12 @@ type DeleteProjectModalProps = {
   projectName: string;
 };
 
-export function DeleteProjectModal({ open, onClose, onSubmit, projectName }: DeleteProjectModalProps) {
+export function DeleteProjectModal({
+  open,
+  onClose,
+  onSubmit,
+  projectName,
+}: DeleteProjectModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -34,7 +39,8 @@ export function DeleteProjectModal({ open, onClose, onSubmit, projectName }: Del
         <DialogHeader>
           <DialogTitle>Delete Project</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete the project "{projectName}"? This action cannot be undone and will permanently delete all tasks associated with this project.
+            Are you sure you want to delete the project "{projectName}"? This action cannot be
+            undone and will permanently delete all tasks associated with this project.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
