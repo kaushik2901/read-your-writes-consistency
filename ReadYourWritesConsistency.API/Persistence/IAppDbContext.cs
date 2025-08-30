@@ -9,5 +9,3 @@ public interface IAppDbContext
     Task<Result<IEnumerable<T>>> QueryStoredProcAsync<T>(string storedProc, object? parameters = null);
     Task<Result> ExecuteStoredProcAsync(string storedProc, object? parameters = null);
 }
-
-
