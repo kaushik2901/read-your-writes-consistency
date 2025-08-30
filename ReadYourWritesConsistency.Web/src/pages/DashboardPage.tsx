@@ -50,39 +50,37 @@ export function DashboardPage() {
           <Card key={p.id} className="flex flex-col hover:shadow-lg transition-shadow duration-300">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-start justify-between">
-                <span className="text-lg">{p.name}</span>
+                <div className="flex flex-col gap-1">
+                  <span className="text-lg">{p.name}</span>
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <Calendar className="mr-1.5 h-3 w-3" />
+                    <span>
+                      Updated {new Date(p.lastUpdatedAtUtc).toLocaleDateString()} at{' '}
+                      {new Date(p.lastUpdatedAtUtc).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                </div>
                 <Button asChild size="sm" variant="outline">
                   <Link to={`/projects/${p.id}`}>View</Link>
                 </Button>
               </CardTitle>
             </CardHeader>
-
-            <CardContent className="flex-grow pb-3">
-              <div className="space-y-3">
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <Calendar className="mr-1.5 h-3 w-3" />
-                  <span>
-                    Updated {new Date(p.lastUpdatedAtUtc).toLocaleDateString()} at{' '}
-                    {new Date(p.lastUpdatedAtUtc).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
+            <CardContent className="flex-grow pb-4 space-y-3">
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                <div className="bg-blue-50 p-2 rounded text-center">
+                  <div className="text-sm font-semibold text-blue-700">{p.newCount}</div>
+                  <div className="text-xs text-muted-foreground">New</div>
                 </div>
-
-                <div className="grid grid-cols-3 gap-2 pt-2">
-                  <div className="bg-blue-50 p-2 rounded text-center">
-                    <div className="text-sm font-semibold text-blue-700">{p.newCount}</div>
-                    <div className="text-xs text-muted-foreground">New</div>
-                  </div>
-                  <div className="bg-green-50 p-2 rounded text-center">
-                    <div className="text-sm font-semibold text-green-700">{p.activeCount}</div>
-                    <div className="text-xs text-muted-foreground">Active</div>
-                  </div>
-                  <div className="bg-red-50 p-2 rounded text-center">
-                    <div className="text-sm font-semibold text-red-700">{p.blockedCount}</div>
-                    <div className="text-xs text-muted-foreground">Blocked</div>
-                  </div>
+                <div className="bg-green-50 p-2 rounded text-center">
+                  <div className="text-sm font-semibold text-green-700">{p.activeCount}</div>
+                  <div className="text-xs text-muted-foreground">Active</div>
+                </div>
+                <div className="bg-red-50 p-2 rounded text-center">
+                  <div className="text-sm font-semibold text-red-700">{p.blockedCount}</div>
+                  <div className="text-xs text-muted-foreground">Blocked</div>
                 </div>
               </div>
             </CardContent>

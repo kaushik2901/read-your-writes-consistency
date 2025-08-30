@@ -15,10 +15,7 @@ import {
 import { Calendar, Pencil, Plus, Trash2 } from 'lucide-react';
 
 type Project = {
-  id: number;
-  name: string;
-  createdByUserId: number;
-  lastUpdatedAtUtc: string;
+  projectMetaData: { id: number; name: string; createdByUserId: number; lastUpdatedAtUtc: string };
   members: { userId: number; displayName: string }[];
 };
 
@@ -26,6 +23,7 @@ type TaskItem = {
   id: number;
   name: string;
   status: string;
+  userName: string;
 };
 
 export function ProjectPage() {
@@ -33,11 +31,7 @@ export function ProjectPage() {
   const { api } = useApiBase();
   const { userId, consistencyMode, setLastIntent } = useAppState();
 
-  const {
-    data: project,
-    isLoading: loadingProject,
-    error: projectError,
-  } = useQuery<Project>({
+  const { data: project, isLoading: loadingProject } = useQuery<Project>({
     queryKey: ['project', projectId, userId, consistencyMode],
     queryFn: async () => {
       const response = await api<Project>(`/projects/${projectId}`);
@@ -68,12 +62,14 @@ export function ProjectPage() {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
-  if (projectError)
+
+  if (tasksError)
     return (
       <div className="text-destructive p-4 bg-destructive/10 rounded-lg">
-        {String((projectError as Error).message)}
+        {String((tasksError as Error).message)}
       </div>
     );
+
   if (!project)
     return <div className="text-center p-8 bg-muted rounded-lg">Project not found.</div>;
 
@@ -96,24 +92,22 @@ export function ProjectPage() {
       <div className="border-b pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{project.name}</h1>
+            <h1 className="text-3xl font-bold text-foreground">{project.projectMetaData.name}</h1>
             <div className="flex items-center text-sm text-muted-foreground mt-2">
               <Calendar className="mr-1.5 h-4 w-4" />
               <span>
-                Updated {new Date(project.lastUpdatedAtUtc).toLocaleDateString()} at{' '}
-                {new Date(project.lastUpdatedAtUtc).toLocaleTimeString([], {
+                Updated {new Date(project.projectMetaData.lastUpdatedAtUtc).toLocaleDateString()} at{' '}
+                {new Date(project.projectMetaData.lastUpdatedAtUtc).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}
               </span>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => {}}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit Project
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" onClick={() => {}}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit Project
+          </Button>
         </div>
       </div>
 
@@ -146,21 +140,31 @@ export function ProjectPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px]">ID</TableHead>
+                  <TableHead className="w-[80px] text-center">ID</TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead className="w-[120px]">Status</TableHead>
-                  <TableHead className="w-[100px] text-right">Actions</TableHead>
+                  <TableHead className="w-[140px]">Status</TableHead>
+                  <TableHead className="w-[140px]">Assigned To</TableHead>
+                  <TableHead className="w-[180px]">Last Updated</TableHead>
+                  <TableHead className="w-[100px] text-right"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {tasks.map(t => (
                   <TableRow key={t.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">{t.id}</TableCell>
+                    <TableCell className="font-medium text-center">{t.id}</TableCell>
                     <TableCell>{t.name}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(t.status)} className="text-xs">
                         {t.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell>{t.userName}</TableCell>
+                    <TableCell>
+                      {new Date(project.projectMetaData.lastUpdatedAtUtc).toLocaleDateString()} at{' '}
+                      {new Date(project.projectMetaData.lastUpdatedAtUtc).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
