@@ -22,14 +22,16 @@ type User = {
 export function Header() {
   const { pathname } = useLocation();
   const { api } = useApiBase();
-  const { userId, setUserId, consistencyMode, setConsistencyMode, lastIntent } = useAppState();
+  const { userId, setUserId, consistencyMode, setConsistencyMode, lastIntent, setLastIntent } =
+    useAppState();
 
   // Fetch users from API
   const { data: users = [] } = useQuery<User[]>({
-    queryKey: ['users'],
+    queryKey: ['users', consistencyMode],
     queryFn: async () => {
-      const usersData = await api<User[]>('/users');
-      return usersData;
+      const response = await api<User[]>('/users');
+      setLastIntent(response.dbSource);
+      return response.value ?? [];
     },
   });
 
@@ -94,7 +96,7 @@ export function Header() {
           <div className="flex items-center gap-1.5">
             <Database className="h-4 w-4 text-muted-foreground" />
             <div className="text-sm">
-              <span className="text-muted-foreground hidden sm:inline">DB:</span>
+              <span className="text-muted-foreground hidden sm:inline">DB: </span>
               <span
                 className={
                   dbSource === 'Master' ? 'text-green-600 font-medium' : 'text-blue-600 font-medium'

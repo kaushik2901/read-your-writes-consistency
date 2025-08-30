@@ -8,7 +8,6 @@ public static class V1EndpointsMapper
 
         v1.MapV1Dashboard();
         v1.MapV1Projects();
-        v1.MapV1ProjectWrites();
         v1.MapV1Tasks();
         v1.MapV1Users();
 
