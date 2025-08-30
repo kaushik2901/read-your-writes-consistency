@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApiBase } from '@/lib/api';
 import { useAppState } from '@/state/AppState';
@@ -17,6 +17,7 @@ import { TaskModal } from '@/components/TaskModal';
 import { UpdateTaskModal } from '@/components/UpdateTaskModal';
 import { DeleteTaskModal } from '@/components/DeleteTaskModal';
 import { EditProjectModal } from '@/components/EditProjectModal';
+import { DeleteProjectModal } from '@/components/DeleteProjectModal';
 import type { TaskItem } from '@/types/TaskItem';
 import { useState } from 'react';
 
@@ -26,6 +27,7 @@ type Project = {
 };
 
 export function ProjectPage() {
+  const navigate = useNavigate();
   const { projectId = '' } = useParams();
   const { api } = useApiBase();
   const { userId, consistencyMode, setLastIntent } = useAppState();
@@ -34,6 +36,7 @@ export function ProjectPage() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
+  const [isDeleteProjectModalOpen, setIsDeleteProjectModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
 
   const openAddModal = () => setIsAddModalOpen(true);
@@ -59,6 +62,9 @@ export function ProjectPage() {
 
   const openEditProjectModal = () => setIsEditProjectModalOpen(true);
   const closeEditProjectModal = () => setIsEditProjectModalOpen(false);
+
+  const openDeleteProjectModal = () => setIsDeleteProjectModalOpen(true);
+  const closeDeleteProjectModal = () => setIsDeleteProjectModalOpen(false);
 
   const { data: project, isLoading: loadingProject } = useQuery<Project>({
     queryKey: ['project', projectId, userId, consistencyMode],
@@ -184,6 +190,23 @@ export function ProjectPage() {
     }
   };
 
+  const deleteProject = async () => {
+    try {
+      const response = await api(`/projects/${projectId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.isSuccess) {
+        // Navigate back to the dashboard
+        navigate('/');
+      } else {
+        console.error('Failed to delete project:', response.error);
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    }
+  };
+
   if (loadingProject || loadingTasks)
     return (
       <div className="flex justify-center items-center h-64">
@@ -232,10 +255,14 @@ export function ProjectPage() {
               </span>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={openEditProjectModal}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit Project
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={openEditProjectModal}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={openDeleteProjectModal}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -329,6 +356,12 @@ export function ProjectPage() {
         onClose={closeEditProjectModal}
         onSubmit={updateProject}
         project={project ? { name: project.projectMetaData.name } : null}
+      />
+      <DeleteProjectModal
+        open={isDeleteProjectModalOpen}
+        onClose={closeDeleteProjectModal}
+        onSubmit={deleteProject}
+        projectName={project?.projectMetaData.name || ''}
       />
     </div>
   );

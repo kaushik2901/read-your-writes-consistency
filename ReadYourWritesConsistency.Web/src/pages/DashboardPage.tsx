@@ -41,12 +41,10 @@ export function DashboardPage() {
   });
 
   const { data: users } = useQuery<User[]>({
-    queryKey: ['users'],
+    queryKey: ['users', consistencyMode],
     queryFn: async () => {
       const response = await api<User[]>('/users');
       setLastIntent(response.dbSource);
-      console.log(response.value);
-
       return response.value ?? [];
     },
   });
@@ -93,7 +91,7 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-bold">Dashboard</h1>
         <Button onClick={openCreateProjectModal}>
           <Plus className="mr-2 h-4 w-4" />
           Create Project
