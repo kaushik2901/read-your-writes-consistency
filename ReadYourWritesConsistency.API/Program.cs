@@ -10,8 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSwaggerGen();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ReadDbContext>();
-builder.Services.AddScoped<ReadWriteDbContext>();
 builder.Services.AddScoped<IAppDbContextFactory, AppDbContextFactory>();
 builder.Services.AddScoped<IDbIntentAccessor, DbIntentAccessor>();
 builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();

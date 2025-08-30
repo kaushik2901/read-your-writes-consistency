@@ -1,4 +1,3 @@
-using Dapper;
 using ReadYourWritesConsistency.API.Models;
 using ReadYourWritesConsistency.API.Persistence;
 using ReadYourWritesConsistency.API.Services;
@@ -20,19 +19,24 @@ public static class ProjectEndpoints
 
     private static async Task<IResult> GetProjectAsync(int projectId, ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory)
     {
-        using var conn = dbFactory.Create().CreateConnection();
+        var result = await dbFactory
+            .Create()
+            .QueryMultiResultStoredProcAsync<ProjectMetaDataDto, ProjectMemberDto>(
+                "[dbo].[Project_Get]",
+                new { RequestingUserId = currentUser.UserId, ProjectId = projectId }
+            );
 
-        await using var multi = await conn.QueryMultipleAsync(
-            "[dbo].[Project_Get]",
-            new { RequestingUserId = currentUser.UserId, ProjectId = projectId },
-            commandType: System.Data.CommandType.StoredProcedure);
+        if (!result.IsSuccess)
+        {
+            Results.BadRequest(Result.Failure(result.Error!, result.DbSource));
+        }
 
-        var projectMetaDataDto = await multi.ReadFirstOrDefaultAsync<ProjectMetaDataDto>();
+        var projectMetaDataDto = result.Value.Item1.FirstOrDefault();
         if (projectMetaDataDto == null || projectMetaDataDto.Id == 0)
             return Results.Ok(Result.Failure("Project not found", "Replica"));
 
-        var members = await multi.ReadAsync<ProjectMemberDto>();
-        var dto = new ProjectDto(projectMetaDataDto, [.. members]);
+        var projectMembers = result.Value.Item2.ToList();
+        var dto = new ProjectDto(projectMetaDataDto, projectMembers);
 
         return Results.Ok(Result<ProjectDto>.Success(dto, "Replica"));
     }

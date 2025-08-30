@@ -4,14 +4,14 @@ public static class V1EndpointsMapper
 {
     public static RouteGroupBuilder MapV1Endpoints(this IEndpointRouteBuilder builder)
     {
-        var group = builder.MapGroup("/v1");
+        var v1 = builder.MapGroup("/v1");
 
-        group.MapV1Dashboard();
-        group.MapV1Projects();
-        group.MapV1ProjectWrites();
-        group.MapV1Tasks();
-        group.MapV1Users();
+        v1.MapV1Dashboard();
+        v1.MapV1Projects();
+        v1.MapV1ProjectWrites();
+        v1.MapV1Tasks();
+        v1.MapV1Users();
 
-        return group;
+        return v1;
     }
 }

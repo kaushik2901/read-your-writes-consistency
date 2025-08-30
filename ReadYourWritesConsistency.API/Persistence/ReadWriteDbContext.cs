@@ -5,26 +5,18 @@ using ReadYourWritesConsistency.API.Models;
 
 namespace ReadYourWritesConsistency.API.Persistence;
 
-public sealed class ReadWriteDbContext
+public sealed class ReadWriteDbContext(string connectionString, string dbSource) : ReadDbContext(connectionString, dbSource), IAppDbContext
 {
-    private readonly string _connectionString;
-    private readonly string _dbSource = "Master";
-
-    public ReadWriteDbContext(IConfiguration configuration)
-    {
-        _connectionString = configuration.GetConnectionString("ReadWrite") ?? throw new ArgumentNullException(_connectionString);
-    }
-
-    public IDbConnection CreateConnection()
+    public new IDbConnection CreateConnection()
     {
         return new SqlConnection(_connectionString);
     }
 
-    public async Task<Result> ExecuteStoredProcAsync(string storedProc, object? parameters = null)
+    public new async Task<Result> ExecuteStoredProcAsync(string storedProc, object? parameters = null)
     {
         try
         {
-            using IDbConnection conn = CreateConnection();
+            using var conn = CreateConnection();
             await conn.ExecuteAsync(storedProc, parameters, commandType: CommandType.StoredProcedure);
             return Result.Success(_dbSource);
         }
@@ -35,24 +27,6 @@ public sealed class ReadWriteDbContext
         catch (Exception ex)
         {
             return Result.Failure(ex.Message, _dbSource);
-        }
-    }
-
-    public async Task<Result<IEnumerable<T>>> ExecuteStoredProcAsync<T>(string storedProc, object? parameters = null)
-    {
-        try
-        {
-            using IDbConnection conn = CreateConnection();
-            var rows = await conn.QueryAsync<T>(storedProc, parameters, commandType: CommandType.StoredProcedure);
-            return Result<IEnumerable<T>>.Success(rows, _dbSource);
-        }
-        catch (SqlException ex)
-        {
-            return Result<IEnumerable<T>>.Failure(ex.Message, _dbSource);
-        }
-        catch (Exception ex)
-        {
-            return Result<IEnumerable<T>>.Failure(ex.Message, _dbSource);
         }
     }
 }

@@ -5,26 +5,53 @@ using ReadYourWritesConsistency.API.Models;
 
 namespace ReadYourWritesConsistency.API.Persistence;
 
-public sealed class ReadDbContext
+public class ReadDbContext(string connectionString, string dbSource) : IAppDbContext
 {
-    private readonly string _connectionString;
-    private readonly string _dbSource = "Replica";
-
-    public ReadDbContext(IConfiguration configuration)
-    {
-        _connectionString = configuration.GetConnectionString("Read") ?? throw new ArgumentNullException(_connectionString);
-    }
+    protected readonly string _connectionString = connectionString;
+    protected readonly string _dbSource = dbSource;
 
     public IDbConnection CreateConnection()
     {
         return new SqlConnection(_connectionString);
     }
 
-    public async Task<Result<IEnumerable<T>>> ExecuteStoredProcAsync<T>(string storedProc, object? parameters = null)
+    public Task<Result> ExecuteStoredProcAsync(string storedProc, object? parameters = null)
+    {
+        return Task.FromResult(Result.Failure("Can not execute write based stored procedures on read-only database.", _dbSource));
+    }
+
+    public async Task<Result<(IEnumerable<A>, IEnumerable<B>)>> QueryMultiResultStoredProcAsync<A, B>(string storedProc, object? parameters = null)
     {
         try
         {
-            using IDbConnection conn = CreateConnection();
+            using var conn = CreateConnection();
+
+            await using var multi = await conn.QueryMultipleAsync(
+                storedProc,
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            var a = await multi.ReadAsync<A>();
+            var b = await multi.ReadAsync<B>();
+
+            return Result<(IEnumerable<A>, IEnumerable<B>)>.Success((a, b), _dbSource);
+        }
+        catch (SqlException ex)
+        {
+            return Result<(IEnumerable<A>, IEnumerable<B>)>.Failure(ex.Message, _dbSource);
+        }
+        catch (Exception ex)
+        {
+            return Result<(IEnumerable<A>, IEnumerable<B>)>.Failure(ex.Message, _dbSource);
+        }
+    }
+
+    public async Task<Result<IEnumerable<T>>> QueryStoredProcAsync<T>(string storedProc, object? parameters = null)
+    {
+        try
+        {
+            using var conn = CreateConnection();
             var rows = await conn.QueryAsync<T>(storedProc, parameters, commandType: CommandType.StoredProcedure);
             return Result<IEnumerable<T>>.Success(rows, _dbSource);
         }
@@ -35,24 +62,6 @@ public sealed class ReadDbContext
         catch (Exception ex)
         {
             return Result<IEnumerable<T>>.Failure(ex.Message, _dbSource);
-        }
-    }
-
-    public async Task<Result> ExecuteStoredProcAsync(string storedProc, object? parameters = null)
-    {
-        try
-        {
-            using IDbConnection conn = CreateConnection();
-            await conn.ExecuteAsync(storedProc, parameters, commandType: CommandType.StoredProcedure);
-            return Result.Success(_dbSource);
-        }
-        catch (SqlException ex)
-        {
-            return Result.Failure(ex.Message, _dbSource);
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure(ex.Message, _dbSource);
         }
     }
 }

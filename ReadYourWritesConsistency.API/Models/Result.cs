@@ -4,9 +4,9 @@ public sealed record Result
 {
     public bool IsSuccess { get; }
     public string? Error { get; }
-    public string? DbSource { get; init; } // Indicates which database was used (Master or Replica)
+    public string DbSource { get; init; } // Indicates which database was used (Master or Replica)
 
-    private Result(bool isSuccess, string? error, string? dbSource = null)
+    private Result(bool isSuccess, string? error, string dbSource)
     {
         IsSuccess = isSuccess;
         Error = error;
@@ -22,9 +22,9 @@ public sealed record Result<T>
     public bool IsSuccess { get; }
     public string? Error { get; }
     public T? Value { get; }
-    public string? DbSource { get; init; } // Indicates which database was used (Master or Replica)
+    public string DbSource { get; init; } // Indicates which database was used (Master or Replica)
 
-    private Result(bool isSuccess, T? value, string? error, string? dbSource = null)
+    private Result(bool isSuccess, T? value, string? error, string dbSource)
     {
         IsSuccess = isSuccess;
         Value = value;
