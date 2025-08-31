@@ -1,0 +1,59 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Password123$"
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "/opt/mssql-tools18/bin/sqlcmd",
+          "-S",
+          "localhost",
+          "-U",
+          "sa",
+          "-P",
+          "Password123$",
+          "-Q",
+          "SELECT 1",
+          "-C",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: ReadYourWritesConsistency.API/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - ConnectionStrings__ReadWrite=Server=db;Database=ReadYourWritesConsistency;User Id=sa;Password=Password123$;TrustServerCertificate=True;
+      - ConnectionStrings__Read=Server=db;Database=ReadYourWritesConsistency;User Id=sa;Password=Password123$;TrustServerCertificate=True;
+
+  web:
+    build:
+      context: .
+      dockerfile: ReadYourWritesConsistency.Web/Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+  db-deploy:
+    build:
+      context: .
+      dockerfile: tools/db-deploy/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SA_PASSWORD: "Password123$"
+
+volumes:
+  sql_data:

@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Text.Json;
 using ReadYourWritesConsistency.API.JSONSerialization;
 using ReadYourWritesConsistency.API.Models;
 
@@ -22,7 +23,9 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
 
             var problem = Result.Failure("An unexpected error occurred.", dbIntentAccessor.Intent == DbIntent.Write ? "Master" : "Replica");
             
-            await context.Response.WriteAsJsonAsync(problem, ExtendedJsonSerializationContext.Default.Result);
+            // Use JsonSerializer with the context instead of WriteAsJsonAsync overload
+            var json = JsonSerializer.Serialize(problem, ExtendedJsonSerializationContext.Default.Result);
+            await context.Response.WriteAsync(json);
         }
     }
 }
