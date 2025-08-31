@@ -310,7 +310,6 @@ export function ProjectPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px] text-center">ID</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead className="w-[140px]">Status</TableHead>
                   <TableHead className="w-[140px]">Assigned To</TableHead>
@@ -321,7 +320,6 @@ export function ProjectPage() {
               <TableBody>
                 {tasks.map(t => (
                   <TableRow key={t.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium text-center">{t.id}</TableCell>
                     <TableCell>{t.name}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(t.status)} className="text-xs">
