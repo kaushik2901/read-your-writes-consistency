@@ -43,8 +43,6 @@ services:
     volumes:
       - sql_replica_data:/var/opt/mssql
       - ./tools/db-deploy:/sql-scripts
-    ports:
-      - "1434:1433"
     networks:
       - sqlserver_network
     healthcheck:
