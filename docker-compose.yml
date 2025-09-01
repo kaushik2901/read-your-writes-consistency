@@ -1,9 +1,12 @@
 services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    hostname: db
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "Password123$"
+      MSSQL_PID: "Developer"
+      MSSQL_AGENT_ENABLED: "true"
     volumes:
       - sql_data:/var/opt/mssql
     healthcheck:
@@ -26,15 +29,53 @@ services:
       retries: 10
       start_period: 10s
 
+  db-replica:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    hostname: db-replica
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Password123$"
+      MSSQL_PID: "Developer"
+      MSSQL_AGENT_ENABLED: "true"
+    volumes:
+      - sql_replica_data:/var/opt/mssql
+    ports:
+      - "1434:1433"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "/opt/mssql-tools18/bin/sqlcmd",
+          "-S",
+          "localhost",
+          "-U",
+          "sa",
+          "-P",
+          "Password123$",
+          "-Q",
+          "SELECT 1",
+          "-C",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      db:
+        condition: service_healthy
+
   api:
     build:
       context: .
       dockerfile: ReadYourWritesConsistency.API/Dockerfile
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      db-replica:
+        condition: service_healthy
     environment:
       - ConnectionStrings__ReadWrite=Server=db;Database=ReadYourWritesConsistency;User Id=sa;Password=Password123$;TrustServerCertificate=True;
-      - ConnectionStrings__Read=Server=db;Database=ReadYourWritesConsistency;User Id=sa;Password=Password123$;TrustServerCertificate=True;
+      - ConnectionStrings__Read=Server=db-replica;Database=ReadYourWritesConsistency;User Id=sa;Password=Password123$;TrustServerCertificate=True;
 
   web:
     build:
@@ -57,3 +98,4 @@ services:
 
 volumes:
   sql_data:
+  sql_replica_data:
