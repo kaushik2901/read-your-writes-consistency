@@ -9,6 +9,9 @@ services:
       MSSQL_AGENT_ENABLED: "true"
     volumes:
       - sql_data:/var/opt/mssql
+      - ./tools/db-deploy:/sql-scripts
+    networks:
+      - sqlserver_network
     healthcheck:
       test:
         [
@@ -39,8 +42,11 @@ services:
       MSSQL_AGENT_ENABLED: "true"
     volumes:
       - sql_replica_data:/var/opt/mssql
+      - ./tools/db-deploy:/sql-scripts
     ports:
       - "1434:1433"
+    networks:
+      - sqlserver_network
     healthcheck:
       test:
         [
@@ -76,6 +82,8 @@ services:
     environment:
       - ConnectionStrings__ReadWrite=Server=db;Database=ReadYourWritesConsistency;User Id=sa;Password=Password123$;TrustServerCertificate=True;
       - ConnectionStrings__Read=Server=db-replica;Database=ReadYourWritesConsistency;User Id=sa;Password=Password123$;TrustServerCertificate=True;
+    networks:
+      - sqlserver_network
 
   web:
     build:
@@ -85,6 +93,8 @@ services:
       - "3000:80"
     depends_on:
       - api
+    networks:
+      - sqlserver_network
 
   db-deploy:
     build:
@@ -93,9 +103,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db-replica:
+        condition: service_healthy
     environment:
       SA_PASSWORD: "Password123$"
+    networks:
+      - sqlserver_network
 
 volumes:
   sql_data:
   sql_replica_data:
+
+networks:
+  sqlserver_network:
+    driver: bridge
