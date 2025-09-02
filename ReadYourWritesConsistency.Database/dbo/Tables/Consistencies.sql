@@ -1,0 +1,5 @@
+﻿CREATE TABLE [dbo].[Consistencies]
+(
+	[Id] INT NOT NULL PRIMARY KEY DEFAULT 1, 
+    [Timestamp] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+)

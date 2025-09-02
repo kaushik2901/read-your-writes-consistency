@@ -57,6 +57,14 @@ BEGIN
             (@ZephyrId, N'Write unit tests', N'New', @BobId),
             (@OrionId, N'Draft project charter', N'New', @CarolId);
     END
+
+    -- Consistencies
+    IF NOT EXISTS (SELECT 1 FROM [dbo].[Consistencies])
+    BEGIN
+        INSERT INTO [dbo].[Consistencies] ([Timestamp])
+        VALUES
+            (SYSUTCDATETIME());
+    END
 END
 
 
