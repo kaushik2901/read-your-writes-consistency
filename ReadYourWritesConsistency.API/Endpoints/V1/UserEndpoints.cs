@@ -14,7 +14,7 @@ public static class UserEndpoints
         return group;
     }
 
-    private static async Task<IResult> GetUsersAsync(IAppDbContextFactory dbFactory)
+    public static async Task<IResult> GetUsersAsync(IAppDbContextFactory dbFactory)
     {
         var result = await dbFactory
             .Create()

@@ -15,7 +15,7 @@ public static class DashboardEndpoints
         return group;
     }
 
-    private static async Task<IResult> DashboardHandlerAsync(ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory)
+    public static async Task<IResult> DashboardHandlerAsync(ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory)
     {
         var result = await dbFactory
             .Create()

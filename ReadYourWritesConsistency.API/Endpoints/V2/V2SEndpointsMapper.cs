@@ -6,7 +6,10 @@ public static class V2SEndpointsMapper
     {
         var v2 = app.MapGroup("/v2");
 
-        v2.MapFallback(() => Results.StatusCode(StatusCodes.Status501NotImplemented));
+        v2.MapV2Dashboard();
+        v2.MapV2Projects();
+        v2.MapV2Tasks();
+        v2.MapV2Users();
 
         return v2;
     }
