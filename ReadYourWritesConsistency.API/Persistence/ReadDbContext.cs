@@ -20,6 +20,11 @@ public class ReadDbContext(string connectionString, string dbSource) : IAppDbCon
         return Task.FromResult(Result.Failure("Can not execute write based stored procedures on read-only database.", _dbSource));
     }
 
+    public Task<Result> ExecuteStoredProcWithTimestampCaptureAsync(string storedProc, object? parameters = null)
+    {
+        return Task.FromResult(Result.Failure("Can not execute write based stored procedures on read-only database.", _dbSource));
+    }
+
     public async Task<Result<(IEnumerable<A>, IEnumerable<B>)>> QueryMultiResultStoredProcAsync<A, B>(string storedProc, object? parameters = null)
     {
         try

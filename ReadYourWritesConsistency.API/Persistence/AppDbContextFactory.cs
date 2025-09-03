@@ -6,11 +6,20 @@ public sealed class AppDbContextFactory(IConfiguration configuration, IDbIntentA
 {
     public IAppDbContext Create()
     {
-        var readConnectionString = configuration.GetConnectionString("Read") ?? throw new ArgumentException("Read connection string is not configured");
-        var readWriteConnectionString = configuration.GetConnectionString("ReadWrite") ?? throw new ArgumentException("ReadWrite connection string is not configured");
-
         return intentAccessor.Intent == DbIntent.Read
-            ? new ReadDbContext(readConnectionString, "Replica")
-            : new ReadWriteDbContext(readWriteConnectionString, "Master");
+            ? CreateReadDbcontext()
+            : CreateWriteDbcontext();
+    }
+
+    public IAppDbContext CreateReadDbcontext()
+    {
+        var readConnectionString = configuration.GetConnectionString("Read") ?? throw new ArgumentException("Read connection string is not configured");
+        return new ReadDbContext(readConnectionString, "Replica");
+    }
+
+    public IAppDbContext CreateWriteDbcontext()
+    {
+        var readWriteConnectionString = configuration.GetConnectionString("ReadWrite") ?? throw new ArgumentException("ReadWrite connection string is not configured");
+        return new ReadWriteDbContext(readWriteConnectionString, "Master");
     }
 }
