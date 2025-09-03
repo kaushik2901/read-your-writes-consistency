@@ -23,8 +23,8 @@ public static class TaskEndpoints
     {
         var result = await dbFactory
             .Create()
-            .ExecuteStoredProcAsync(
-                "[dbo].[Task_Create_V1]",
+            .ExecuteStoredProcWithTimestampCaptureAsync(
+                "[dbo].[Task_Create_V2]",
                 new
                 {
                     RequestingUserId = currentUser.UserId,
@@ -44,8 +44,8 @@ public static class TaskEndpoints
     {
         var result = await dbFactory
             .Create()
-            .ExecuteStoredProcAsync(
-                "[dbo].[Task_Update_V1]",
+            .ExecuteStoredProcWithTimestampCaptureAsync(
+                "[dbo].[Task_Update_V2]",
                 new
                 {
                     RequestingUserId = currentUser.UserId,
@@ -65,8 +65,8 @@ public static class TaskEndpoints
     {
         var result = await dbFactory
             .Create()
-            .ExecuteStoredProcAsync(
-                "[dbo].[Task_Delete_V1]",
+            .ExecuteStoredProcWithTimestampCaptureAsync(
+                "[dbo].[Task_Delete_V2]",
                 new { RequestingUserId = currentUser.UserId, TaskId = taskId }
             );
 
@@ -75,5 +75,3 @@ public static class TaskEndpoints
             : Results.BadRequest(Result.Failure(result.Error!, result.DbSource));
     }
 }
-
-

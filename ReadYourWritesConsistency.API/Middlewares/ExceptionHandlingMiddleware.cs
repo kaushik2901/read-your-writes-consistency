@@ -22,7 +22,7 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
             context.Response.ContentType = MediaTypeNames.Application.Json;
 
             var problem = Result.Failure("An unexpected error occurred.", dbIntentAccessor.Intent == DbIntent.Write ? "Master" : "Replica");
-            
+
             // Use JsonSerializer with the context instead of WriteAsJsonAsync overload
             var json = JsonSerializer.Serialize(problem, ExtendedJsonSerializationContext.Default.Result);
             await context.Response.WriteAsync(json);

@@ -29,6 +29,30 @@ public sealed class ReadWriteDbContext(string connectionString, string dbSource)
             return Result.Failure(ex.Message, _dbSource);
         }
     }
+
+    public new async Task<Result> ExecuteStoredProcWithTimestampCaptureAsync(string storedProc, object? parameters = null)
+    {
+        try
+        {
+            var response = await QueryStoredProcAsync<DateTime>(storedProc, parameters);
+            if (!response.IsSuccess)
+            {
+                return Result.Failure(response.Error!, _dbSource);
+            }
+
+            Console.WriteLine(response.Value!.First());
+
+            return Result.Success(_dbSource);
+        }
+        catch (SqlException ex)
+        {
+            return Result.Failure(ex.Message, _dbSource);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(ex.Message, _dbSource);
+        }
+    }
 }
 
 

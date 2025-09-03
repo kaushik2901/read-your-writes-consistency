@@ -13,7 +13,7 @@ public static class ProjectEndpoints
     {
         var group = app.MapGroup("/projects");
 
-        group.MapPost("", GetProjectsAsync);
+        group.MapPost("", CreateProjectAsync);
 
         group.MapGet("/{projectId:int}", V1.ProjectEndpoints.GetProjectAsync);
 
@@ -26,7 +26,7 @@ public static class ProjectEndpoints
         return group;
     }
 
-    private static async Task<IResult> GetProjectsAsync(CreateProjectRequest req, ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory)
+    private static async Task<IResult> CreateProjectAsync(CreateProjectRequest req, ICurrentUserAccessor currentUser, IAppDbContextFactory dbFactory)
     {
         var parameters = new DynamicParameters();
         parameters.Add("RequestingUserId", currentUser.UserId, DbType.Int32);
@@ -35,8 +35,8 @@ public static class ProjectEndpoints
 
         var result = await dbFactory
             .Create()
-            .ExecuteStoredProcAsync(
-                "[dbo].[Project_Create_V1]",
+            .ExecuteStoredProcWithTimestampCaptureAsync(
+                "[dbo].[Project_Create_V2]",
                 parameters
             );
 
@@ -55,8 +55,8 @@ public static class ProjectEndpoints
 
         var result = await dbFactory
             .Create()
-            .ExecuteStoredProcAsync(
-                "[dbo].[Project_Update_V1]",
+            .ExecuteStoredProcWithTimestampCaptureAsync(
+                "[dbo].[Project_Update_V2]",
                 parameters
             );
 
@@ -69,8 +69,8 @@ public static class ProjectEndpoints
     {
         var result = await dbFactory
             .Create()
-            .ExecuteStoredProcAsync(
-                "[dbo].[Project_Delete_V1]",
+            .ExecuteStoredProcWithTimestampCaptureAsync(
+                "[dbo].[Project_Delete_V2]",
                 new { RequestingUserId = currentUser.UserId, ProjectId = projectId }
             );
 
