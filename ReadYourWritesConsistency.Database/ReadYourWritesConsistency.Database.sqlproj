@@ -89,8 +89,6 @@
     <Build Include="dbo\Stored Procedures\Task_Create_V2.sql" />
     <Build Include="dbo\Stored Procedures\Task_Delete_V2.sql" />
     <Build Include="dbo\Stored Procedures\Task_Update_V2.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <Build Include="dbo\Stored Procedures\X_SeedData_Upsert.sql" />
+    <Build Include="dbo\Stored Procedures\SeedData_Upsert.sql" />
   </ItemGroup>
 </Project>
