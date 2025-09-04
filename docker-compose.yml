@@ -1,12 +1,14 @@
 services:
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:2025-latest
     hostname: db
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "Password123$"
       MSSQL_PID: "Developer"
       MSSQL_AGENT_ENABLED: "true"
+    ports:
+      - "1443:1433"
     volumes:
       - sql_data:/var/opt/mssql
       - ./tools/db-deploy:/sql-scripts
@@ -33,13 +35,15 @@ services:
       start_period: 10s
 
   db-replica:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:2025-latest
     hostname: db-replica
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "Password123$"
       MSSQL_PID: "Developer"
       MSSQL_AGENT_ENABLED: "true"
+    ports:
+      - "1453:1433"
     volumes:
       - sql_replica_data:/var/opt/mssql
       - ./tools/db-deploy:/sql-scripts
