@@ -21,15 +21,13 @@ type User = {
 export function Header() {
   const { pathname } = useLocation();
   const { api } = useApiBase();
-  const { userId, setUserId, consistencyMode, setConsistencyMode, lastIntent, setLastIntent } =
-    useAppState();
+  const { userId, setUserId, consistencyMode, setConsistencyMode, lastIntent } = useAppState();
 
   // Fetch users from API
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ['users', consistencyMode],
     queryFn: async () => {
       const response = await api<User[]>('/users');
-      setLastIntent(response.dbSource);
       return response.value ?? [];
     },
   });

@@ -100,7 +100,6 @@ export function ProjectPage() {
     queryKey: ['users', consistencyMode],
     queryFn: async () => {
       const response = await api<User[]>('/users');
-      setLastIntent(response.dbSource);
       return response.value ?? [];
     },
   });
