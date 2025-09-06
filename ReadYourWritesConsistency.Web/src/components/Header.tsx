@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Select,
@@ -34,11 +33,6 @@ export function Header() {
       return response.value ?? [];
     },
   });
-
-  // Determine DB source based on last intent
-  const dbSource = useMemo(() => {
-    return lastIntent === 'write' ? 'Master' : 'Replica';
-  }, [lastIntent]);
 
   return (
     <header className="w-full border-b bg-background/95 backdrop-blur">
@@ -99,10 +93,12 @@ export function Header() {
               <span className="text-muted-foreground hidden sm:inline">DB: </span>
               <span
                 className={
-                  dbSource === 'Master' ? 'text-green-600 font-medium' : 'text-blue-600 font-medium'
+                  lastIntent === 'Master'
+                    ? 'text-green-600 font-medium'
+                    : 'text-blue-600 font-medium'
                 }
               >
-                {dbSource}
+                {lastIntent}
               </span>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 
 type ConsistencyMode = 'none' | 'ryw';
 
@@ -16,11 +16,7 @@ const Ctx = createContext<AppState | null>(null);
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [userId, setUserId] = useState<number>(1);
   const [consistencyMode, setConsistencyMode] = useState<ConsistencyMode>('none');
-  const [lastIntent, _setLastIntent] = useState<string>('');
-
-  const setLastIntent = useCallback((i: string) => {
-    _setLastIntent(i);
-  }, []);
+  const [lastIntent, setLastIntent] = useState<string>('');
 
   const value = useMemo<AppState>(
     () => ({
