@@ -1,3 +1,5 @@
+using ReadYourWritesConsistency.API.Caching;
+using ReadYourWritesConsistency.API.ConsistencyServices;
 using ReadYourWritesConsistency.API.Endpoints.V1;
 using ReadYourWritesConsistency.API.Endpoints.V2;
 using ReadYourWritesConsistency.API.JsonSerialization;
@@ -5,19 +7,25 @@ using ReadYourWritesConsistency.API.Middlewares;
 using ReadYourWritesConsistency.API.Models;
 using ReadYourWritesConsistency.API.Persistence;
 using ReadYourWritesConsistency.API.Services;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
+builder.Services.AddRedis();
 builder.Services.AddExtendedJsonSerializationContext();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAppDbContextFactory, AppDbContextFactory>();
 builder.Services.AddScoped<IDbIntentAccessor, DbIntentAccessor>();
 builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
+builder.Services.AddScoped<IConsistencyService, ConsistencyService>();
+builder.Services.AddScoped<ConsistencyContext>();
+builder.Services.AddScoped<ConsistencyStore>();
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<DbIntentMiddleware>();
+app.UseMiddleware<ReadConsistencyMiddleware>();
 
 app.MapV1Endpoints();
 app.MapV2Endpoints();
