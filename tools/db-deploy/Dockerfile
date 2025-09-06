@@ -16,5 +16,6 @@ RUN apt-get update && apt-get install -y wget unzip libicu-dev libssl-dev curl g
 COPY --from=build /src/ReadYourWritesConsistency.Database/bin/Release/*.dacpac .
 COPY tools/db-deploy/deploy.sh .
 COPY tools/db-deploy/scripts ./scripts
+RUN sed -i 's/\r$//' deploy.sh
 RUN chmod +x ./deploy.sh
 CMD ["./deploy.sh"]
