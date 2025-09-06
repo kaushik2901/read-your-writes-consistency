@@ -1,6 +1,6 @@
 services:
   db:
-    image: mcr.microsoft.com/mssql/server:2025-latest
+    image: mcr.microsoft.com/mssql/server:2022-latest
     hostname: db
     environment:
       ACCEPT_EULA: "Y"
@@ -35,7 +35,7 @@ services:
       start_period: 10s
 
   db-replica:
-    image: mcr.microsoft.com/mssql/server:2025-latest
+    image: mcr.microsoft.com/mssql/server:2022-latest
     hostname: db-replica
     environment:
       ACCEPT_EULA: "Y"
@@ -72,6 +72,19 @@ services:
       db:
         condition: service_healthy
 
+  redis:
+    image: redis:7-alpine
+    hostname: redis
+    ports:
+      - "6389:6379"
+    networks:
+      - sqlserver_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
       context: .
@@ -81,9 +94,12 @@ services:
         condition: service_healthy
       db-replica:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       - ConnectionStrings__ReadWrite=Server=db;Database=ReadYourWritesConsistency;User Id=sa;Password=Password123$;TrustServerCertificate=True;
       - ConnectionStrings__Read=Server=db-replica;Database=ReadYourWritesConsistency;User Id=sa;Password=Password123$;TrustServerCertificate=True;
+      - ConnectionStrings__Redis=redis:6379
     networks:
       - sqlserver_network
 
